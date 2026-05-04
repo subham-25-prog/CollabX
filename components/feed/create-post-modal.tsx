@@ -6,8 +6,6 @@ import { X, Image, Smile, MapPin, Users, Loader2, Sparkles, BarChart2, Plus, Tra
 import { useAuth } from "@/components/auth/auth-provider"
 import { createPost } from "@/lib/db"
 import { toast } from "sonner"
-import { storage } from "@/lib/firebase"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import imageCompression from "browser-image-compression"
 
 interface CreatePostModalProps {
@@ -72,9 +70,20 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
             fileToUpload = selectedFile
           }
         }
-        const fileRef = ref(storage, `posts/${profile.uid}/${Date.now()}_${fileToUpload.name}`)
-        await uploadBytes(fileRef, fileToUpload)
-        finalImageUrl = await getDownloadURL(fileRef)
+        const formData = new FormData()
+        formData.append("image", fileToUpload)
+        
+        const response = await fetch("https://api.imgbb.com/1/upload?key=6e38ec9c63ca880872d00fe6e4be0417", {
+          method: "POST",
+          body: formData
+        })
+        
+        const data = await response.json()
+        if (data.success) {
+          finalImageUrl = data.data.url
+        } else {
+          throw new Error("Failed to upload image")
+        }
       } else if (selectedImage) {
         finalImageUrl = selectedImage
       }
@@ -107,9 +116,13 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
     const file = e.target.files?.[0]
     if (file) {
       const isVideo = file.type.startsWith('video/')
-      const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024
+      if (isVideo) {
+        toast.error("Video uploads are not supported on the free plan.")
+        return
+      }
+      const maxSize = 5 * 1024 * 1024
       if (file.size > maxSize) {
-        toast.error(`${isVideo ? 'Video' : 'Image'} size must be less than ${isVideo ? '50MB' : '5MB'}`)
+        toast.error(`Image size must be less than 5MB`)
         return
       }
       setSelectedFile(file)
@@ -330,7 +343,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
-                accept="image/*,video/*"
+                accept="image/*"
                 className="hidden"
               />
               <button
