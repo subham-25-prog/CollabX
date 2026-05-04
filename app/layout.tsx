@@ -1,14 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from 'sonner'
 import './globals.css'
-
-const inter = Inter({ 
-  subsets: ["latin"],
-  variable: '--font-inter'
-})
 
 export const metadata: Metadata = {
   title: 'CollabX - Find Your Perfect Team',
@@ -46,11 +41,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-background" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <AuthProvider>
             {children}
             {process.env.NODE_ENV === 'production' && <Analytics />}
+            <Toaster position="bottom-right" theme="dark" />
           </AuthProvider>
         </ThemeProvider>
       </body>

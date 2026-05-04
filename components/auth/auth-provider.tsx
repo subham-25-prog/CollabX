@@ -50,26 +50,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userRef = doc(db, "users", firebaseUser.uid)
         
         const unsubscribeProfile = onSnapshot(userRef, async (docSnap) => {
-          if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile)
-          } else {
-            // Create default profile for new user
-            const newProfile: UserProfile = {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              name: firebaseUser.email?.split('@')[0] || "New User",
-              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${firebaseUser.uid}`,
-              role: "Student",
-              bio: "Hey there! I am using CollabX.",
-              skills: [],
-              availability: "Available",
-              location: "Earth",
-              onboardingCompleted: false,
+          try {
+            if (docSnap.exists()) {
+              setProfile(docSnap.data() as UserProfile)
+            } else {
+              // Create default profile for new user
+              const newProfile: UserProfile = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email || "",
+                name: firebaseUser.email?.split('@')[0] || "New User",
+                avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${firebaseUser.uid}`,
+                role: "Student",
+                bio: "Hey there! I am using CollabX.",
+                skills: [],
+                availability: "Available",
+                location: "Earth",
+                onboardingCompleted: false,
+              }
+              await setDoc(userRef, newProfile)
+              setProfile(newProfile)
             }
-            await setDoc(userRef, newProfile)
-            setProfile(newProfile)
+          } catch (error) {
+            console.error("Error creating or fetching user profile:", error)
+          } finally {
+            setIsLoading(false)
           }
-          setIsLoading(false)
         })
 
         return () => unsubscribeProfile()
