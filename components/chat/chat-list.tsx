@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import Image from "next/image"
 import { Search, Edit } from "lucide-react"
 
 interface Conversation {
@@ -74,9 +75,12 @@ export function ChatList({ conversations, selectedId, onSelect }: ChatListProps)
               }`}
             >
               <div className="relative flex-shrink-0">
-                <img
+                <Image
                   src={conversation.user.avatar}
                   alt={conversation.user.name}
+                  width={48}
+                  height={48}
+                  unoptimized
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 {conversation.user.online && (

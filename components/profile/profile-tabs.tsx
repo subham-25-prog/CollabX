@@ -3,11 +3,11 @@
 import { motion } from "framer-motion"
 import { FileText, Award, FolderKanban, Users } from "lucide-react"
 
-const tabs = [
-  { id: "posts", label: "Posts", icon: FileText, count: 24 },
-  { id: "achievements", label: "Achievements", icon: Award, count: 8 },
-  { id: "projects", label: "Projects", icon: FolderKanban, count: 12 },
-  { id: "teams", label: "Teams", icon: Users, count: 3 },
+const tabs: { id: string; label: string; icon: any; count?: number }[] = [
+  { id: "posts", label: "Posts", icon: FileText },
+  { id: "achievements", label: "Achievements", icon: Award },
+  { id: "projects", label: "Projects", icon: FolderKanban },
+  { id: "teams", label: "Teams", icon: Users },
 ]
 
 interface ProfileTabsProps {
@@ -32,13 +32,15 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
           >
             <tab.icon className="w-4 h-4" />
             <span className="hidden sm:inline">{tab.label}</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs ${
-              isActive 
-                ? "bg-primary/10 text-primary" 
-                : "bg-secondary text-secondary-foreground"
-            }`}>
-              {tab.count}
-            </span>
+            {tab.count !== undefined && (
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                isActive 
+                  ? "bg-primary/10 text-primary" 
+                  : "bg-secondary text-secondary-foreground"
+              }`}>
+                {tab.count}
+              </span>
+            )}
             {isActive && (
               <motion.div
                 layoutId="activeProfileTab"

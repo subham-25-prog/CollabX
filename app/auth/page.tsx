@@ -1,12 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useMotionTemplate, useMotionValue } from "framer-motion"
 import { AuthForm } from "@/components/auth/auth-form"
 import { AuthAnimation } from "@/components/auth/auth-animation"
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
+
+  // Spotlight Effect State
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect()
+    mouseX.set(clientX - left)
+    mouseY.set(clientY - top)
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -48,35 +58,52 @@ export default function AuthPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4 }}
-            className="glass rounded-2xl p-8"
+            onMouseMove={handleMouseMove}
+            className="group glass rounded-2xl p-8 relative overflow-hidden"
           >
-            {/* Tab switcher */}
-            <div className="flex gap-2 mb-8 p-1 bg-secondary/50 rounded-xl">
-              <button
-                onClick={() => setIsLogin(true)}
-                className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  isLogin 
-                    ? "bg-primary text-primary-foreground shadow-lg" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => setIsLogin(false)}
-                className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  !isLogin 
-                    ? "bg-primary text-primary-foreground shadow-lg" 
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Sign Up
-              </button>
-            </div>
+            {/* Spotlight background */}
+            <motion.div
+              className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100"
+              style={{
+                background: useMotionTemplate`
+                  radial-gradient(
+                    650px circle at ${mouseX}px ${mouseY}px,
+                    rgba(var(--primary), 0.1),
+                    transparent 80%
+                  )
+                `,
+              }}
+            />
+            
+            <div className="relative z-10">
+              {/* Tab switcher */}
+              <div className="flex gap-2 mb-8 p-1 bg-secondary/50 rounded-xl">
+                <button
+                  onClick={() => setIsLogin(true)}
+                  className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    isLogin 
+                      ? "bg-primary text-primary-foreground shadow-lg" 
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => setIsLogin(false)}
+                  className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    !isLogin 
+                      ? "bg-primary text-primary-foreground shadow-lg" 
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Sign Up
+                </button>
+              </div>
 
-            <AnimatePresence mode="wait">
-              <AuthForm key={isLogin ? "login" : "signup"} isLogin={isLogin} />
-            </AnimatePresence>
+              <AnimatePresence mode="wait">
+                <AuthForm key={isLogin ? "login" : "signup"} isLogin={isLogin} />
+              </AnimatePresence>
+            </div>
           </motion.div>
 
           <p className="text-center text-sm text-muted-foreground mt-6">

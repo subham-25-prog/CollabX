@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Mail, KeyRound, Loader2, ArrowLeft } from "lucide-react"
+import { motion } from "framer-motion"
+import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
-import { signInWithCustomToken } from "firebase/auth"
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { toast } from "sonner"
 
 interface AuthFormProps {
@@ -14,62 +14,22 @@ interface AuthFormProps {
 
 export function AuthForm({ isLogin }: AuthFormProps) {
   const router = useRouter()
-  const [step, setStep] = useState<1 | 2>(1)
   const [isLoading, setIsLoading] = useState(false)
-  const [email, setEmail] = useState("")
-  const [otp, setOtp] = useState("")
 
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleGoogleSignIn = async () => {
     setIsLoading(true)
-    
     try {
-      const res = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to send code")
-      }
-
-      toast.success("Verification code sent to your email!")
-      setStep(2)
-    } catch (error: any) {
-      toast.error(error.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      // 1. Verify OTP with our backend
-      const res = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || "Invalid verification code")
-      }
-
-      // 2. Log in to Firebase using the Custom Token from backend
-      await signInWithCustomToken(auth, data.token)
-
+      const provider = new GoogleAuthProvider()
+      await signInWithPopup(auth, provider)
+      
       toast.success("Successfully authenticated!")
+      // The auth-provider will handle fetching/creating the profile 
+      // and redirecting will be handled by the protected pages if onboarding is incomplete.
+      // We push to /feed which will bounce to /onboarding if needed.
       router.push("/feed")
     } catch (error: any) {
-      toast.error(error.message)
+      console.error(error)
+      toast.error(error.message || "Failed to sign in with Google")
     } finally {
       setIsLoading(false)
     }
@@ -82,111 +42,31 @@ export function AuthForm({ isLogin }: AuthFormProps) {
           {isLogin ? "Welcome back" : "Create account"}
         </h2>
         <p className="text-muted-foreground mt-1">
-          {step === 1 
-            ? "Enter your email to receive a login code" 
-            : `We sent a code to ${email}`}
+          Sign in to access your CollabX workspace
         </p>
       </div>
 
-      <AnimatePresence mode="wait">
-        {step === 1 ? (
-          <motion.form
-            key="step1"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.3 }}
-            onSubmit={handleSendOtp}
-            className="space-y-4"
-          >
-            {/* Email field */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/30 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none placeholder:text-muted-foreground"
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={isLoading || !email}
-              className="w-full py-3.5 px-4 rounded-xl gradient-primary text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Sending code...
-                </>
-              ) : (
-                "Continue with Email"
-              )}
-            </motion.button>
-          </motion.form>
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={handleGoogleSignIn}
+        disabled={isLoading}
+        className="w-full py-3.5 px-4 rounded-xl glass border border-border hover:border-primary/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 mt-4 text-foreground font-medium"
+      >
+        {isLoading ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
-          <motion.form
-            key="step2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            onSubmit={handleVerifyOtp}
-            className="space-y-4"
-          >
-            {/* OTP field */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground">Verification Code</label>
-                <button 
-                  type="button" 
-                  onClick={() => setStep(1)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-                >
-                  <ArrowLeft className="w-3 h-3" /> Change email
-                </button>
-              </div>
-              <div className="relative">
-                <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl bg-secondary/30 border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none placeholder:text-muted-foreground tracking-widest text-lg font-mono"
-                  placeholder="123456"
-                  required
-                />
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={isLoading || otp.length !== 6}
-              className="w-full py-3.5 px-4 rounded-xl gradient-primary text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                "Verify & Login"
-              )}
-            </motion.button>
-          </motion.form>
+          <>
+            <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </>
         )}
-      </AnimatePresence>
+      </motion.button>
     </div>
   )
 }

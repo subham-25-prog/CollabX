@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is logged in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Allow authenticated users to read and write all documents
+    // Note: For a production app with >1000 users, you would restrict writes
+    // specifically to documents where request.auth.uid == resource.data.authorId
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

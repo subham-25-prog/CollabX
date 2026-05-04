@@ -3,12 +3,15 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
+import { useAuth } from "@/components/auth/auth-provider"
 import { Home, Users, MessageCircle, User, Settings, LogOut, Sparkles } from "lucide-react"
 
-const navItems = [
+import { useNotifications } from "@/hooks/use-notifications"
+
+const navItems: { icon: any; label: string; href: string; badge?: number }[] = [
   { icon: Home, label: "Home Feed", href: "/feed" },
   { icon: Users, label: "Find Team", href: "/teams" },
-  { icon: MessageCircle, label: "Messages", href: "/chat", badge: 3 },
+  { icon: MessageCircle, label: "Messages", href: "/chat" },
   { icon: User, label: "Profile", href: "/profile" },
 ]
 
@@ -19,6 +22,16 @@ const bottomItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { profile } = useAuth()
+  const { unreadCount } = useNotifications()
+
+  const getAvatarImage = () => {
+    const p = profile as any;
+    if (p?.avatar) return p.avatar;
+    if (p?.gender === 'Female') return "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop";
+    if (p?.gender === 'Male') return "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&fit=crop";
+    return `https://api.dicebear.com/7.x/initials/svg?seed=${p?.name || "fallback"}`;
+  };
 
   return (
     <aside className="hidden lg:flex fixed left-0 top-16 bottom-0 w-64 flex-col glass-strong border-r border-border z-40">
@@ -31,22 +44,27 @@ export function Sidebar() {
           >
             <div className="relative">
               <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"
-                alt="Your profile"
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20"
+                src={getAvatarImage()}
+                alt={profile?.name || "Your profile"}
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20 bg-background"
               />
               <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-foreground truncate">Tom Wilson</p>
-              <p className="text-sm text-muted-foreground truncate">@tomwilson</p>
+              <p className="font-medium text-foreground truncate">{profile?.name || "User"}</p>
+              <p className="text-sm text-muted-foreground truncate">@{profile?.name ? profile.name.toLowerCase().replace(/\s/g, '') : "user"}</p>
             </div>
           </motion.div>
         </Link>
 
         {/* Main navigation */}
         <nav className="space-y-1">
-          {navItems.map((item) => {
+          {[
+            { icon: Home, label: "Home Feed", href: "/feed" },
+            { icon: Users, label: "Find Team", href: "/teams" },
+            { icon: MessageCircle, label: "Messages", href: "/chat", badge: unreadCount > 0 ? unreadCount : undefined },
+            { icon: User, label: "Profile", href: "/profile" },
+          ].map((item) => {
             const isActive = pathname === item.href
             return (
               <Link key={item.href} href={item.href}>
@@ -71,24 +89,7 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* Upgrade card */}
-        <div className="mt-6 p-4 rounded-2xl gradient-primary relative overflow-hidden">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl" />
-          </div>
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-              <span className="font-semibold text-primary-foreground">Go Pro</span>
-            </div>
-            <p className="text-sm text-primary-foreground/80 mb-3">
-              Unlock advanced team matching and analytics
-            </p>
-            <button className="w-full py-2 px-4 rounded-lg bg-white/20 hover:bg-white/30 text-primary-foreground text-sm font-medium transition-colors">
-              Upgrade Now
-            </button>
-          </div>
-        </div>
+        {/* Upgrade card removed for student platform */}
       </div>
 
       {/* Bottom navigation */}

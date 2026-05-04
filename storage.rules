@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function to check if user is logged in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    match /{allPaths=**} {
+      // Allow authenticated users to read and upload files
+      allow read: if true; // Anyone can read avatars/posts
+      allow write: if isAuthenticated() 
+                   && request.resource.size < 50 * 1024 * 1024; // Max 50MB
+    }
+  }
+}

@@ -2,19 +2,29 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Home, Users, Plus, MessageCircle, User } from "lucide-react"
+import { useState } from "react"
+import { CreatePostModal } from "@/components/feed/create-post-modal"
 
-const navItems = [
+const getNavItems = (unreadMessages: number) => [
   { icon: Home, label: "Feed", href: "/feed" },
   { icon: Users, label: "Teams", href: "/teams" },
   { icon: Plus, label: "Post", href: "#", isAction: true },
-  { icon: MessageCircle, label: "Chat", href: "/chat", badge: 3 },
+  { icon: MessageCircle, label: "Chat", href: "/chat", badge: unreadMessages > 0 ? unreadMessages : null },
   { icon: User, label: "Profile", href: "/profile" },
 ]
 
+import { useNotifications } from "@/hooks/use-notifications"
+
 export function MobileNav() {
   const pathname = usePathname()
+  const { notifications } = useNotifications()
+  const [showCreatePost, setShowCreatePost] = useState(false)
+  
+  // Count unread message notifications specifically
+  const unreadMessages = notifications.filter(n => !n.read && n.type === 'message').length
+  const navItems = getNavItems(unreadMessages)
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border safe-area-pb">
@@ -28,6 +38,7 @@ export function MobileNav() {
                 key={item.label}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
+                onClick={() => setShowCreatePost(true)}
                 className="flex items-center justify-center w-12 h-12 rounded-full gradient-primary shadow-lg shadow-primary/30"
               >
                 <item.icon className="w-6 h-6 text-primary-foreground" />
@@ -63,6 +74,12 @@ export function MobileNav() {
           )
         })}
       </div>
+
+      <AnimatePresence>
+        {showCreatePost && (
+          <CreatePostModal onClose={() => setShowCreatePost(false)} />
+        )}
+      </AnimatePresence>
     </nav>
   )
 }

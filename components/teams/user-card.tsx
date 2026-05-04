@@ -1,12 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
-import { MapPin, UserPlus, MessageCircle } from "lucide-react"
+import { MapPin, UserPlus, MessageCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { createChat, toggleFollowUser } from "@/lib/db"
+import { useAuth } from "@/components/auth/auth-provider"
 
 interface UserCardProps {
   user: {
-    id: string
+    uid: string // Using uid from Firestore
     name: string
     avatar: string
     role: string
@@ -24,87 +29,135 @@ const availabilityColors: Record<string, string> = {
 }
 
 export function UserCard({ user }: UserCardProps) {
+  const router = useRouter()
+  const { profile: currentUser } = useAuth()
+  const [isMessaging, setIsMessaging] = useState(false)
+  const [isFollowLoading, setIsFollowLoading] = useState(false)
+  const isFollowing = (currentUser?.following || []).includes(user.uid)
+
+  const handleFollow = async () => {
+    if (!currentUser || !user.uid) return
+    setIsFollowLoading(true)
+    try {
+      await toggleFollowUser(currentUser.uid, user.uid, isFollowing)
+      // Note: We don't need a local state for following because it will update when `profile` refetches
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsFollowLoading(false)
+    }
+  }
+
+  const handleMessage = async () => {
+    if (!currentUser || !user.uid) return
+    setIsMessaging(true)
+    try {
+      const chatRef = await createChat([currentUser.uid, user.uid])
+      router.push(`/chat?id=${chatRef.id}`)
+    } catch (error) {
+      console.error(error)
+      setIsMessaging(false)
+    }
+  }
+
+  // Fallback for availability
+  const availabilityStatus = user.availability || "Available"
+  const availabilityClass = availabilityColors[availabilityStatus] || availabilityColors["Available"]
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="glass rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5"
+      className="glass rounded-xl p-4 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 flex flex-col h-full"
     >
       {/* Header with avatar and info */}
-      <div className="flex items-start gap-4 mb-4">
-        <Link href="/profile">
+      <div className="flex items-start gap-3 mb-3">
+        <Link href={`/profile?id=${user.uid}`}>
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="relative"
           >
-            <img
-              src={user.avatar}
+            <Image
+              src={user.avatar || "https://api.dicebear.com/7.x/initials/svg?seed=fallback"}
               alt={user.name}
-              className="w-14 h-14 rounded-xl object-cover ring-2 ring-transparent hover:ring-primary/30 transition-all"
+              width={40}
+              height={40}
+              unoptimized
+              className="w-10 h-10 rounded-lg object-cover ring-1 ring-transparent hover:ring-primary/30 transition-all bg-secondary"
             />
           </motion.div>
         </Link>
         <div className="flex-1 min-w-0">
-          <Link href="/profile">
-            <h3 className="font-semibold text-foreground hover:text-primary transition-colors truncate">
+          <Link href={`/profile?id=${user.uid}`}>
+            <h3 className="text-sm font-semibold text-foreground hover:text-primary transition-colors truncate">
               {user.name}
             </h3>
           </Link>
-          <p className="text-sm text-muted-foreground truncate">{user.role}</p>
-          <div className="flex items-center gap-2 mt-1">
-            <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">{user.location}</span>
+          <p className="text-xs text-muted-foreground truncate">{user.role}</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <MapPin className="w-3 h-3 text-muted-foreground" />
+            <span className="text-[10px] text-muted-foreground">{user.location || "Earth"}</span>
           </div>
         </div>
         <span
-          className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
-            availabilityColors[user.availability]
-          }`}
+          className={`px-2 py-0.5 rounded-md text-[10px] font-medium border ${availabilityClass}`}
         >
-          {user.availability}
+          {availabilityStatus}
         </span>
       </div>
 
       {/* Bio */}
-      <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-2">
-        {user.bio}
+      <p className="text-xs text-muted-foreground leading-relaxed mb-3 line-clamp-2 flex-1">
+        {user.bio || "No bio provided."}
       </p>
 
       {/* Skills */}
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {user.skills.slice(0, 4).map((skill) => (
+      <div className="flex flex-wrap gap-1 mb-3 min-h-[24px]">
+        {(user.skills || []).slice(0, 3).map((skill) => (
           <span
             key={skill}
-            className="px-2.5 py-1 rounded-lg bg-secondary/50 text-secondary-foreground text-xs font-medium"
+            className="px-2 py-0.5 rounded-md bg-secondary/50 text-secondary-foreground text-[10px] font-medium"
           >
             {skill}
           </span>
         ))}
-        {user.skills.length > 4 && (
-          <span className="px-2.5 py-1 rounded-lg bg-secondary/50 text-muted-foreground text-xs font-medium">
-            +{user.skills.length - 4}
+        {(user.skills || []).length > 3 && (
+          <span className="px-2 py-0.5 rounded-md bg-secondary/50 text-muted-foreground text-[10px] font-medium">
+            +{(user.skills || []).length - 3}
           </span>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl gradient-primary text-primary-foreground text-sm font-medium shadow-lg shadow-primary/20"
-        >
-          <UserPlus className="w-4 h-4" />
-          Invite to Team
-        </motion.button>
-        <Link href="/chat">
+      <div className="flex items-center gap-2 mt-auto">
+        {currentUser?.uid !== user.uid ? (
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleFollow}
+            disabled={isFollowLoading}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
+              isFollowing 
+                ? "bg-secondary text-secondary-foreground hover:bg-secondary/80" 
+                : "gradient-primary text-primary-foreground shadow-sm shadow-primary/20"
+            }`}
           >
-            <MessageCircle className="w-5 h-5" />
+            {isFollowLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserPlus className="w-3 h-3" />}
+            {isFollowing ? "Following" : "Follow"}
           </motion.button>
-        </Link>
+        ) : (
+          <div className="flex-1 py-2 rounded-lg bg-secondary text-secondary-foreground text-center text-xs font-medium">
+            You
+          </div>
+        )}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleMessage}
+          disabled={isMessaging || currentUser?.uid === user.uid}
+          className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors disabled:opacity-50"
+        >
+          {isMessaging ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+        </motion.button>
       </div>
     </motion.div>
   )
