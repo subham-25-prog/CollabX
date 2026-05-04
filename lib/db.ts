@@ -17,11 +17,12 @@ import {
 } from "firebase/firestore"
 
 // POSTS
-export async function createPost(author: { id: string, name: string, avatar: string, role: string }, content: string, image?: string, pollOptions?: string[]) {
+export async function createPost(author: { id: string, name: string, avatar: string, role: string }, content: string, image?: string, pollOptions?: string[], images?: string[]) {
   return await addDoc(collection(db, "posts"), {
     author,
     content,
     image: image || null,
+    images: images || [],
     poll: pollOptions && pollOptions.length >= 2 ? {
       options: pollOptions.map((opt, i) => ({ id: i.toString(), text: opt, votes: 0 })),
       votedUsers: {} // Map of userId to optionId

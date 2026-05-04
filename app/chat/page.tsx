@@ -69,11 +69,14 @@ function ChatContent() {
               const userDoc = await getDoc(doc(db, "users", otherUserId))
               if (userDoc.exists()) {
                 const userData = userDoc.data()
+                const lastActive = userData.lastActive?.toDate()
+                const isOnline = lastActive ? (new Date().getTime() - lastActive.getTime()) < 10 * 60 * 1000 : false
+                
                 otherUser = {
                   id: otherUserId,
                   name: userData.name,
                   avatar: userData.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherUserId}`,
-                  online: true, // Mock online status for now
+                  online: isOnline,
                   isGroup: false
                 }
               }

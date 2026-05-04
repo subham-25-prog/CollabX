@@ -139,7 +139,7 @@ export default function TeamsPage() {
             <div className="flex p-1 rounded-xl bg-secondary/50 backdrop-blur-md overflow-x-auto custom-scrollbar">
               <button
                 onClick={() => setActiveTab("projects")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === "projects" 
                     ? "bg-background text-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground"
@@ -149,7 +149,7 @@ export default function TeamsPage() {
               </button>
               <button
                 onClick={() => setActiveTab("my_projects")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === "my_projects" 
                     ? "bg-background text-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground"
@@ -159,7 +159,7 @@ export default function TeamsPage() {
               </button>
               <button
                 onClick={() => setActiveTab("startups")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === "startups" 
                     ? "bg-background text-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground"
@@ -169,7 +169,7 @@ export default function TeamsPage() {
               </button>
               <button
                 onClick={() => setActiveTab("students")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === "students" 
                     ? "bg-background text-foreground shadow-sm" 
                     : "text-muted-foreground hover:text-foreground"
@@ -212,14 +212,14 @@ export default function TeamsPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-medium transition-all duration-200 ${
+              className={`flex shrink-0 items-center justify-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3.5 rounded-xl text-sm sm:text-base font-medium transition-all duration-200 ${
                 showFilters 
                   ? "gradient-primary text-primary-foreground shadow-lg shadow-primary/20" 
                   : "glass hover:border-primary/30"
               }`}
             >
-              {showFilters ? <X className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-              <span>Filters</span>
+              {showFilters ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Filter className="w-4 h-4 sm:w-5 sm:h-5" />}
+              <span className="hidden sm:inline">Filters</span>
               {(selectedSkills.length > 0 || selectedAvailability) && (
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-accent text-xs font-semibold text-accent-foreground">
                   {selectedSkills.length + (selectedAvailability ? 1 : 0)}

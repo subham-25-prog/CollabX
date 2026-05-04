@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
-import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore"
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from "firebase/firestore"
 import { useRouter } from "next/navigation"
 
 interface UserProfile {
@@ -88,6 +88,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => unsubscribe()
   }, [router])
+
+  useEffect(() => {
+    if (!user) return
+    const updatePresence = async () => {
+      try {
+        const userRef = doc(db, "users", user.uid)
+        await updateDoc(userRef, { lastActive: serverTimestamp() })
+      } catch (error) {
+        console.error("Failed to update presence:", error)
+      }
+    }
+    updatePresence()
+    const interval = setInterval(updatePresence, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [user])
 
   return (
     <AuthContext.Provider value={{ user, profile, isLoading }}>

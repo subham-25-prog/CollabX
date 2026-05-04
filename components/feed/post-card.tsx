@@ -23,6 +23,7 @@ interface PostCardProps {
     }
     content: string
     image?: string
+    images?: string[]
     likes: string[]
     commentsCount: number
     sharesCount: number
@@ -42,6 +43,15 @@ export function PostCard({ post }: PostCardProps) {
   const [likesCount, setLikesCount] = useState(post.likes.length)
   const [isSaved, setIsSaved] = useState(false)
   const [showComments, setShowComments] = useState(false)
+
+  // Sync state with props for real-time updates when other users like
+  // Sync state with props for real-time updates when other users like
+  React.useEffect(() => {
+    if (profile) {
+      setIsLiked(post.likes.includes(profile.uid))
+    }
+    setLikesCount(post.likes.length)
+  }, [post.likes, profile])
 
   // Format timestamp safely
   const timeAgo = post.timestamp?.toDate ? formatTimeAgo(post.timestamp.toDate()) : "Just now"
@@ -158,8 +168,29 @@ export function PostCard({ post }: PostCardProps) {
         <p className="text-foreground leading-relaxed whitespace-pre-wrap">{post.content}</p>
       </div>
 
-      {/* Image */}
-      {post.image && (
+      {/* Images/Media */}
+      {post.images && post.images.length > 0 ? (
+        <div className="px-0 sm:px-4 pb-3">
+          <div className="flex overflow-x-auto snap-x snap-mandatory custom-scrollbar gap-1 sm:rounded-xl">
+            {post.images.map((img, i) => (
+              <div key={i} className="min-w-full snap-center sm:rounded-xl overflow-hidden border-y sm:border border-border relative">
+                <Image
+                  src={img}
+                  alt={`Post image ${i+1}`}
+                  width={800}
+                  height={500}
+                  className="w-full h-auto object-cover max-h-[500px]"
+                />
+                {post.images!.length > 1 && (
+                  <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                    {i + 1} / {post.images!.length}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : post.image ? (
         <div className="px-0 sm:px-4 pb-3">
           <motion.div
             whileHover={{ scale: 1.01 }}
@@ -182,7 +213,7 @@ export function PostCard({ post }: PostCardProps) {
             )}
           </motion.div>
         </div>
-      )}
+      ) : null}
 
       {/* Poll */}
       {post.poll && (
@@ -238,7 +269,7 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Actions */}
       <div className="p-2 flex items-center justify-between">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleLike}
@@ -260,7 +291,9 @@ export function PostCard({ post }: PostCardProps) {
             <MessageCircle className="w-5 h-5" />
             <span className="text-sm font-medium">Comment</span>
           </motion.button>
+        </div>
 
+        <div className="flex items-center gap-2">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={async () => {
@@ -285,19 +318,19 @@ export function PostCard({ post }: PostCardProps) {
             <Share2 className="w-5 h-5" />
             <span className="text-sm font-medium hidden sm:inline">Share</span>
           </motion.button>
-        </div>
 
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsSaved(!isSaved)}
-          className={`p-2.5 rounded-xl transition-all duration-200 ${
-            isSaved 
-              ? "text-primary bg-primary/10" 
-              : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-          }`}
-        >
-          <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
-        </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsSaved(!isSaved)}
+            className={`p-2.5 rounded-xl transition-all duration-200 ${
+              isSaved 
+                ? "text-primary bg-primary/10" 
+                : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+            }`}
+          >
+            <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
+          </motion.button>
+        </div>
       </div>
 
       <AnimatePresence>

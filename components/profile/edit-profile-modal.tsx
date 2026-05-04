@@ -75,12 +75,18 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
     
     setIsLoading(true)
     try {
+      const finalSkills = [...skills]
+      const pendingSkill = currentSkill.trim()
+      if (pendingSkill && !finalSkills.includes(pendingSkill)) {
+        finalSkills.push(pendingSkill)
+      }
+
       const updateData: any = {
         name,
         role,
         bio,
         location,
-        skills
+        skills: finalSkills
       }
       
       if (avatarPreview && avatarPreview.startsWith('data:image')) {

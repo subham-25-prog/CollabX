@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { MapPin, Calendar, Link as LinkIcon, MessageCircle, UserPlus, Edit3 } from "lucide-react"
+import { MapPin, Calendar, Link as LinkIcon, MessageCircle, UserPlus, Edit3, Settings } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -9,6 +9,7 @@ import { toggleFollowUser, createChat, updateUserProfile } from "@/lib/db"
 import { toast } from "sonner"
 import { AnimatePresence } from "framer-motion"
 import Image from "next/image"
+import Link from "next/link"
 import dynamic from "next/dynamic"
 
 const EditProfileModal = dynamic(() => import("@/components/profile/edit-profile-modal").then(mod => mod.EditProfileModal), { ssr: false })
@@ -82,7 +83,7 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
   return (
     <div className="relative">
       {/* Cover Image */}
-      <div className="h-48 sm:h-64 relative overflow-hidden bg-secondary group">
+      <div className="h-32 sm:h-64 relative overflow-hidden bg-secondary group">
         <Image
           src={getCoverImage()}
           alt="Cover"
@@ -93,7 +94,7 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
       </div>
 
       <div className="max-w-4xl mx-auto px-4">
-        <div className="relative -mt-20 sm:-mt-24">
+        <div className="relative -mt-16 sm:-mt-24 flex justify-between items-end flex-wrap gap-4">
           {/* Profile Image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -107,12 +108,32 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
               width={160}
               height={160}
               unoptimized
-              className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl object-cover border-4 border-background shadow-xl bg-background"
+              className="w-28 h-28 sm:w-40 sm:h-40 rounded-2xl object-cover border-4 border-background shadow-xl bg-background"
             />
-            <span className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 rounded-full border-4 border-background" />
+            <span className="absolute bottom-2 right-2 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-4 border-background" />
           </motion.div>
 
-          <div className="mt-4 sm:flex sm:items-start sm:justify-between">
+          <div className="flex items-center gap-2 mb-2 sm:mb-6">
+            {isOwnProfile && (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium transition-colors text-sm sm:text-base"
+                  onClick={() => setShowEditModal(true)}
+                >
+                  <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Edit Profile
+                </motion.button>
+                <Link href="/settings" className="lg:hidden p-2 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors shadow-sm">
+                  <Settings className="w-5 h-5" />
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 sm:flex sm:items-start sm:justify-between">
             <div className="flex-1">
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -194,17 +215,7 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
               transition={{ duration: 0.4, delay: 0.3 }}
               className="flex items-center gap-3 mt-6 sm:mt-0"
             >
-              {isOwnProfile ? (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium transition-colors"
-                  onClick={() => setShowEditModal(true)}
-                >
-                  <Edit3 className="w-5 h-5" />
-                  Edit Profile
-                </motion.button>
-              ) : (
+              {!isOwnProfile && (
                 <>
                   <motion.button
                     whileHover={{ scale: 1.02 }}

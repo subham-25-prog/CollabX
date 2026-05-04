@@ -104,7 +104,7 @@ export function ChatList({ conversations, selectedId, onSelect }: ChatListProps)
                     {conversation.lastMessage}
                   </p>
                   {conversation.unread > 0 && (
-                    <span className="flex-shrink-0 flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-accent text-xs font-semibold text-accent-foreground">
+                    <span className="flex-shrink-0 flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-green-500 text-xs font-semibold text-white">
                       {conversation.unread}
                     </span>
                   )}

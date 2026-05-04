@@ -126,8 +126,9 @@ export function Navbar({ onCreatePost }: NavbarProps) {
           </Link>
 
           {/* Search bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8 relative" ref={searchRef}>
-            <div className="relative w-full">
+          {isFeedPage && (
+            <div className="hidden md:flex flex-1 max-w-md mx-8 relative" ref={searchRef}>
+              <div className="relative w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
@@ -209,20 +210,23 @@ export function Navbar({ onCreatePost }: NavbarProps) {
               )}
             </AnimatePresence>
           </div>
+          )}
 
           {/* Right side actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Mobile search toggle */}
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="md:hidden p-2.5 rounded-xl hover:bg-secondary/50 transition-colors"
-            >
-              {isSearchOpen ? (
-                <X className="w-5 h-5 text-foreground" />
-              ) : (
-                <Search className="w-5 h-5 text-muted-foreground" />
-              )}
-            </button>
+            {isFeedPage && (
+              <button
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className="md:hidden p-2.5 rounded-xl hover:bg-secondary/50 transition-colors"
+              >
+                {isSearchOpen ? (
+                  <X className="w-5 h-5 text-foreground" />
+                ) : (
+                  <Search className="w-5 h-5 text-muted-foreground" />
+                )}
+              </button>
+            )}
 
             {/* Notifications */}
             <Link href="/notifications" className="relative p-2.5 rounded-xl hover:bg-secondary/50 transition-colors outline-none block">

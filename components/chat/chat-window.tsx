@@ -124,14 +124,21 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
       let imageUrl = null
       if (currentAttachment) {
         if (currentAttachment.type.startsWith('image/')) {
-          const base64Str = await compressImageToBase64(currentAttachment, 1920)
-          const imageRef = ref(storage, `chats/${chatId}/${Date.now()}_${currentAttachment.name}`)
-          await uploadString(imageRef, base64Str, 'data_url')
-          imageUrl = await getDownloadURL(imageRef)
+          const formData = new FormData()
+          formData.append("image", currentAttachment)
+          const response = await fetch("https://api.imgbb.com/1/upload?key=6e38ec9c63ca880872d00fe6e4be0417", {
+            method: "POST",
+            body: formData
+          })
+          const data = await response.json()
+          if (data.success) {
+            imageUrl = data.data.url
+          } else {
+            throw new Error("Failed to upload image")
+          }
         } else {
-          const imageRef = ref(storage, `chats/${chatId}/${Date.now()}_${currentAttachment.name}`)
-          await uploadBytes(imageRef, currentAttachment)
-          imageUrl = await getDownloadURL(imageRef)
+          toast.error("Video uploads are not supported on the free plan.")
+          return
         }
       }
 
@@ -184,24 +191,26 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
     <div className="flex-1 flex flex-col h-full bg-background/50">
       <div className="flex items-center justify-between p-3 glass-strong border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <Image
-              src={conversation.user.avatar}
-              alt={conversation.user.name}
-              width={40}
-              height={40}
-              unoptimized
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          </div>
-          <div>
-            <h3 className="font-semibold text-foreground leading-tight">
-              {conversation.user.name}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {conversation.user.isGroup ? "Group Chat" : (conversation.user.online ? "online" : "offline")}
-            </p>
-          </div>
+          <Link href={`/profile?id=${conversation.user.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="relative">
+              <Image
+                src={conversation.user.avatar}
+                alt={conversation.user.name}
+                width={40}
+                height={40}
+                unoptimized
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/20"
+              />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground leading-tight hover:underline">
+                {conversation.user.name}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {conversation.user.isGroup ? "Group Chat" : (conversation.user.online ? "online" : "offline")}
+              </p>
+            </div>
+          </Link>
         </div>
         <div className="flex items-center gap-1">
           {!conversation.user.isGroup && (
@@ -351,7 +360,8 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
                 >
                   <span>{message.timestampFormatted}</span>
                   {message.sender === "me" && (
-                    message.isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCheck className="w-3.5 h-3.5 text-blue-300" />
+                    message.isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 
+                    <CheckCheck className={`w-3.5 h-3.5 ${message.read ? 'text-blue-500' : 'text-muted-foreground'}`} />
                   )}
                 </div>
               </div>
