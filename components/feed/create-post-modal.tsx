@@ -15,7 +15,6 @@ interface CreatePostModalProps {
 }
 
 const EMOJIS = ['😀','😂','🔥','🚀','✨','🎉','❤️','👍','🙌','👀','💡','💻','🎓','🛠️','🎨','🧠','☕','🍕','⚽','🎸']
-const LOCATIONS = ['Campus Library', 'Cafeteria', 'Main Auditorium', 'Tech Hub', 'Study Room 4', 'Dormitory', 'Sports Complex']
 const FUNNY_SNIPPETS = [
   '(╯°□°)╯︵ ┻━┻', 
   'ʕ•ᴥ•ʔ', 
@@ -35,7 +34,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedMediaType, setSelectedMediaType] = useState<'image' | 'video' | null>(null)
   
-  const [activePopover, setActivePopover] = useState<'emoji' | 'location' | null>(null)
+  const [activePopover, setActivePopover] = useState<'emoji' | null>(null)
   
   // Poll State
   const [showPoll, setShowPoll] = useState(false)
@@ -61,12 +60,17 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       if (selectedFile) {
         let fileToUpload = selectedFile
         if (selectedMediaType === 'image') {
-          const options = {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true
+          try {
+            const options = {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1920,
+              useWebWorker: true
+            }
+            fileToUpload = await imageCompression(selectedFile, options)
+          } catch (compressionError) {
+            console.error("Compression failed, using original file", compressionError)
+            fileToUpload = selectedFile
           }
-          fileToUpload = await imageCompression(selectedFile, options)
         }
         const fileRef = ref(storage, `posts/${profile.uid}/${Date.now()}_${fileToUpload.name}`)
         await uploadBytes(fileRef, fileToUpload)
@@ -315,33 +319,6 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
                 </div>
               </motion.div>
             )}
-
-            {activePopover === 'location' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute bottom-4 left-4 z-10 glass border border-border rounded-xl p-2 shadow-xl w-64"
-              >
-                <p className="text-xs font-semibold text-muted-foreground mb-2 px-2 pt-1 uppercase tracking-wider">Popular Locations</p>
-                <div className="flex flex-col gap-1">
-                  {LOCATIONS.map((loc) => (
-                    <button
-                      key={loc}
-                      onClick={() => {
-                        appendToContent(` 📍 ${loc} `)
-                        setActivePopover(null)
-                      }}
-                      className="text-left text-sm text-foreground hover:bg-secondary px-3 py-2 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      {loc}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
           </AnimatePresence>
         </div>
 
@@ -378,20 +355,8 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
               </button>
 
               <button
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  setActivePopover(activePopover === 'location' ? null : 'location'); 
-                }}
-                className={`p-2.5 rounded-full transition-colors relative group ${activePopover === 'location' ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10 text-primary'}`}
-                title="Location"
-              >
-                <MapPin className="w-5 h-5" />
-                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Location</span>
-              </button>
-
-              <button
                 onClick={(e) => { e.stopPropagation(); handleMemeClick(); }}
-                className="p-2.5 rounded-full hover:bg-primary/10 transition-colors text-primary relative group hidden sm:block"
+                className="p-2.5 rounded-full hover:bg-primary/10 transition-colors text-primary relative group"
                 title="Fun Snippet"
               >
                 <Sparkles className="w-5 h-5" />
@@ -400,7 +365,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
 
               <button
                 onClick={(e) => { e.stopPropagation(); handlePollClick(); }}
-                className={`p-2.5 rounded-full transition-colors relative group hidden sm:block ${showPoll ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10 text-primary'}`}
+                className={`p-2.5 rounded-full transition-colors relative group ${showPoll ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10 text-primary'}`}
                 title="Poll"
               >
                 <BarChart2 className="w-5 h-5" />
