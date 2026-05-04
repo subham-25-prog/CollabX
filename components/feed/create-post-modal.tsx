@@ -64,7 +64,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
             const options = {
               maxSizeMB: 1,
               maxWidthOrHeight: 1920,
-              useWebWorker: true
+              useWebWorker: false
             }
             fileToUpload = await imageCompression(selectedFile, options)
           } catch (compressionError) {
