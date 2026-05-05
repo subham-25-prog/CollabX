@@ -134,9 +134,9 @@ export default function TeamsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.05 }}
-            className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8"
+            className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6"
           >
-            <div className="flex flex-wrap p-1 rounded-xl bg-secondary/50 backdrop-blur-md gap-1">
+            <div className="flex flex-nowrap overflow-x-auto custom-scrollbar p-1 rounded-xl bg-secondary/50 backdrop-blur-md gap-1 max-w-full w-full sm:w-auto">
               <button
                 onClick={() => setActiveTab("projects")}
                 className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
@@ -184,7 +184,7 @@ export default function TeamsPage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-primary text-primary-foreground font-medium shadow-lg shadow-primary/20"
+                className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-primary text-primary-foreground font-medium shadow-lg shadow-primary/20 shrink-0"
               >
                 <Plus className="w-4 h-4" /> {activeTab === "startups" ? "Post Idea" : "Post Requirement"}
               </motion.button>
@@ -196,16 +196,16 @@ export default function TeamsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6"
+            className="flex flex-row items-center gap-2 sm:gap-3 mb-6"
           >
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search by name, role, or skills..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 rounded-xl glass border border-transparent focus:border-primary/30 transition-all duration-200 outline-none text-base placeholder:text-muted-foreground"
+                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-3.5 rounded-xl glass border border-transparent focus:border-primary/30 transition-all duration-200 outline-none text-sm sm:text-base placeholder:text-muted-foreground"
               />
             </div>
             <motion.button
@@ -343,6 +343,16 @@ export default function TeamsPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Floating Action Button (Mobile) */}
+      {(activeTab === "projects" || activeTab === "my_projects" || activeTab === "startups") && (
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="sm:hidden fixed bottom-24 right-4 z-40 p-4 rounded-full gradient-primary text-primary-foreground shadow-lg shadow-primary/20 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      )}
     </div>
   )
 }

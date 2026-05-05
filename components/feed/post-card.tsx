@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Link as LinkIcon, Flag, Trash2 } from "lucide-react"
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Link as LinkIcon, Flag, Trash2, X } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { toggleLikePost, voteOnPoll, deletePost } from "@/lib/db"
 import { toast } from "sonner"
@@ -43,6 +43,7 @@ export function PostCard({ post }: PostCardProps) {
   const [isSaved, setIsSaved] = useState(false)
   const [showComments, setShowComments] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   // Format timestamp safely
   const timeAgo = post.timestamp?.toDate ? formatTimeAgo(post.timestamp.toDate()) : "Just now"
@@ -160,16 +161,19 @@ export function PostCard({ post }: PostCardProps) {
         <div className="px-0 sm:px-4 pb-3">
           <div className="flex overflow-x-auto snap-x snap-mandatory custom-scrollbar gap-1 sm:rounded-xl">
             {post.images.map((img, i) => (
-              <div key={i} className="min-w-full snap-center sm:rounded-xl overflow-hidden border-y sm:border border-border relative">
+              <div 
+                key={i} 
+                className="min-w-full snap-center sm:rounded-xl overflow-hidden border-y sm:border border-border relative aspect-[4/5] sm:aspect-video bg-secondary cursor-pointer"
+                onClick={() => setSelectedImage(img)}
+              >
                 <Image
                   src={img}
                   alt={`Post image ${i+1}`}
-                  width={800}
-                  height={500}
-                  className="w-full h-auto object-cover max-h-[500px]"
+                  fill
+                  className="object-cover"
                 />
                 {post.images!.length > 1 && (
-                  <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                  <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm z-10">
                     {i + 1} / {post.images!.length}
                   </div>
                 )}
@@ -181,21 +185,21 @@ export function PostCard({ post }: PostCardProps) {
         <div className="px-0 sm:px-4 pb-3">
           <motion.div
             whileHover={{ scale: 1.01 }}
-            className="sm:rounded-xl rounded-none overflow-hidden border-y sm:border border-border"
+            className="sm:rounded-xl rounded-none overflow-hidden border-y sm:border border-border relative aspect-[4/5] sm:aspect-video bg-secondary cursor-pointer"
+            onClick={() => { if (!post.image?.match(/\.(mp4|webm|mov|ogg)/i)) setSelectedImage(post.image!) }}
           >
             {post.image.match(/\.(mp4|webm|mov|ogg)/i) ? (
               <video
                 src={post.image}
                 controls
-                className="w-full h-auto object-cover max-h-[500px] bg-black/10"
+                className="absolute inset-0 w-full h-full object-cover bg-black/10"
               />
             ) : (
               <Image
                 src={post.image}
                 alt="Post media"
-                width={800}
-                height={500}
-                className="w-full h-auto object-cover max-h-[500px]"
+                fill
+                className="object-cover"
               />
             )}
           </motion.div>
@@ -323,6 +327,30 @@ export function PostCard({ post }: PostCardProps) {
       <AnimatePresence>
         {showComments && (
           <PostCommentsModal post={post} onClose={() => setShowComments(false)} />
+        )}
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm cursor-zoom-out"
+          >
+            <motion.img
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              src={selectedImage}
+              alt="Full screen"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            />
+            <button 
+              className="absolute top-4 right-4 p-2 text-white/70 hover:text-white bg-black/50 rounded-full transition-colors"
+              onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
     </motion.article>

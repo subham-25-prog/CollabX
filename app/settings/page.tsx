@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { Navbar } from "@/components/layout/navbar"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { useAuth } from "@/components/auth/auth-provider"
-import { Bell, Shield, Key, Moon, Sun, Monitor, LogOut } from "lucide-react"
+import { Bell, Shield, Key, Moon, Sun, Monitor, LogOut, ArrowLeft, ChevronRight } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [activeTab, setActiveTab] = useState("account")
+  const [isMobileDetail, setIsMobileDetail] = useState(false)
 
   useEffect(() => {
     if (!isLoading && !profile) {
@@ -48,30 +49,47 @@ export default function SettingsPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Sidebar-like tabs for settings (desktop only) */}
-            <div className="hidden md:flex flex-col gap-2">
+            {/* Sidebar-like tabs for settings */}
+            <div className={`flex-col gap-2 md:flex ${isMobileDetail ? 'hidden' : 'flex'}`}>
               <button 
-                onClick={() => setActiveTab("account")}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-left transition-colors ${activeTab === "account" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary/50"}`}
+                onClick={() => { setActiveTab("account"); setIsMobileDetail(true); }}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "account" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary/50"}`}
               >
-                <Shield className="w-5 h-5" /> Account
+                <div className="flex items-center gap-3">
+                  <Shield className="w-5 h-5" /> Account
+                </div>
+                <ChevronRight className="w-4 h-4 md:hidden" />
               </button>
               <button 
-                onClick={() => setActiveTab("notifications")}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-left transition-colors ${activeTab === "notifications" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary/50"}`}
+                onClick={() => { setActiveTab("notifications"); setIsMobileDetail(true); }}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "notifications" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary/50"}`}
               >
-                <Bell className="w-5 h-5" /> Notifications
+                <div className="flex items-center gap-3">
+                  <Bell className="w-5 h-5" /> Notifications
+                </div>
+                <ChevronRight className="w-4 h-4 md:hidden" />
               </button>
               <button 
-                onClick={() => setActiveTab("privacy")}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-left transition-colors ${activeTab === "privacy" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary/50"}`}
+                onClick={() => { setActiveTab("privacy"); setIsMobileDetail(true); }}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-colors ${activeTab === "privacy" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary/50"}`}
               >
-                <Key className="w-5 h-5" /> Privacy
+                <div className="flex items-center gap-3">
+                  <Key className="w-5 h-5" /> Privacy
+                </div>
+                <ChevronRight className="w-4 h-4 md:hidden" />
               </button>
             </div>
 
             {/* Content area */}
-            <div className="md:col-span-2 space-y-6">
+            <div className={`md:col-span-2 space-y-6 md:block ${isMobileDetail ? 'block' : 'hidden'}`}>
+              {isMobileDetail && (
+                <button 
+                  onClick={() => setIsMobileDetail(false)}
+                  className="md:hidden flex items-center gap-2 mb-2 text-muted-foreground hover:text-foreground font-medium"
+                >
+                  <ArrowLeft className="w-5 h-5" /> Back to Settings
+                </button>
+              )}
               {activeTab === "account" && (
                 <>
                   <div className="glass rounded-2xl p-6 space-y-6">

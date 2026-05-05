@@ -13,7 +13,8 @@ import {
   where,
   increment,
   getDoc,
-  deleteDoc
+  deleteDoc,
+  writeBatch
 } from "firebase/firestore"
 
 // POSTS
@@ -124,7 +125,34 @@ export async function getAllUsers() {
 
 export async function updateUserProfile(userId: string, data: any) {
   const userRef = doc(db, "users", userId)
-  return await updateDoc(userRef, data)
+  const batch = writeBatch(db)
+  
+  batch.update(userRef, data)
+
+  if (data.name !== undefined || data.avatar !== undefined || data.role !== undefined) {
+    const postsQuery = query(collection(db, "posts"), where("author.id", "==", userId))
+    const postsSnap = await getDocs(postsQuery)
+    
+    postsSnap.forEach(postDoc => {
+      const updatePayload: any = {}
+      if (data.name !== undefined) updatePayload["author.name"] = data.name
+      if (data.avatar !== undefined) updatePayload["author.avatar"] = data.avatar
+      if (data.role !== undefined) updatePayload["author.role"] = data.role
+      batch.update(postDoc.ref, updatePayload)
+    })
+
+    const projectsQuery = query(collection(db, "projects"), where("owner.id", "==", userId))
+    const projectsSnap = await getDocs(projectsQuery)
+    
+    projectsSnap.forEach(projDoc => {
+      const updatePayload: any = {}
+      if (data.name !== undefined) updatePayload["owner.name"] = data.name
+      if (data.avatar !== undefined) updatePayload["owner.avatar"] = data.avatar
+      batch.update(projDoc.ref, updatePayload)
+    })
+  }
+
+  return await batch.commit()
 }
 
 // CHATS
