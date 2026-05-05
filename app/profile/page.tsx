@@ -108,7 +108,7 @@ function ProfileContent() {
         {/* Content based on active tab */}
         <div className="mt-6">
           {activeTab === "posts" && (
-            <div className="space-y-6">
+            <div className="space-y-6 max-w-[470px] mx-auto">
               {userPosts.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No posts yet.</p>
               ) : (

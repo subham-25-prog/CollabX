@@ -32,7 +32,7 @@ export function InstallPWAButton({ className }: { className?: string }) {
     }
   }, [])
 
-  if (!deferredPrompt || isInstalled) return null
+  if (isInstalled) return null
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
@@ -40,10 +40,15 @@ export function InstallPWAButton({ className }: { className?: string }) {
       const { outcome } = await deferredPrompt.userChoice
       if (outcome === 'accepted') {
         console.log('User accepted the install prompt')
-      } else {
-        console.log('User dismissed the install prompt')
       }
       setDeferredPrompt(null)
+    } else {
+      // Fallback if prompt is not available
+      import("sonner").then(({ toast }) => {
+        toast.info("To install: tap 'Share' then 'Add to Home Screen' (iOS) or use your browser's menu (Android/Desktop).", {
+          duration: 6000,
+        })
+      })
     }
   }
 
