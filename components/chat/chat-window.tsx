@@ -11,7 +11,7 @@ import { toast } from "sonner"
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
 import Link from "next/link"
 import Image from "next/image"
-import { muteChat, reportUser, blockUser, deleteChat } from "@/lib/db"
+import { muteChat, reportUser, blockUser, deleteChat, setTypingStatus } from "@/lib/db"
 import { useRouter } from "next/navigation"
 import { compressImageToBase64 } from "@/lib/image-utils"
 
@@ -52,8 +52,40 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
   const [isSending, setIsSending] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [typingUsers, setTypingUsers] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Listen for typing status
+  useEffect(() => {
+    if (!chatId) return
+    const unsubscribe = onSnapshot(doc(db, "chats", chatId), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data()
+        const typing = data.typing || {}
+        const othersTyping = Object.keys(typing).filter(uid => uid !== currentUser?.uid && typing[uid] === true)
+        setTypingUsers(othersTyping)
+      }
+    })
+    return () => unsubscribe()
+  }, [chatId, currentUser])
+
+  // Update my typing status
+  useEffect(() => {
+    if (!chatId || !currentUser) return
+    
+    const setStatus = (status: boolean) => {
+      setTypingStatus(chatId, currentUser.uid, status).catch(() => {})
+    }
+
+    if (newMessage.trim()) {
+      setStatus(true)
+      const timeout = setTimeout(() => setStatus(false), 3000)
+      return () => clearTimeout(timeout)
+    } else {
+      setStatus(false)
+    }
+  }, [newMessage, chatId, currentUser])
 
   const isMutualFollower = currentUser?.following?.includes(conversation.user.id) && currentUser?.followers?.includes(conversation.user.id)
 
@@ -232,7 +264,11 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
                 {conversation.user.name}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {conversation.user.isGroup ? "Group Chat" : (conversation.user.online ? "online" : "offline")}
+                {conversation.user.isGroup ? (
+                  typingUsers.length > 0 ? "Someone is typing..." : "Group Chat"
+                ) : (
+                  typingUsers.length > 0 ? "typing..." : (conversation.user.online ? "online" : "offline")
+                )}
               </p>
             </div>
           </Link>

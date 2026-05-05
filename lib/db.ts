@@ -156,6 +156,13 @@ export async function updateUserProfile(userId: string, data: any) {
 }
 
 // CHATS
+export async function setTypingStatus(chatId: string, userId: string, isTyping: boolean) {
+  const chatRef = doc(db, "chats", chatId)
+  return await updateDoc(chatRef, {
+    [`typing.${userId}`]: isTyping
+  })
+}
+
 export async function createChat(participantIds: string[]) {
   // Simple chat creation
   return await addDoc(collection(db, "chats"), {

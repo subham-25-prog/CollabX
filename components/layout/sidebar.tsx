@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
 import { useAuth } from "@/components/auth/auth-provider"
-import { Home, Users, MessageCircle, User, Settings, LogOut, Sparkles } from "lucide-react"
+import { Home, Users, MessageCircle, User, Settings, LogOut, Sparkles, ShieldCheck } from "lucide-react"
 
 import { useNotifications } from "@/hooks/use-notifications"
 import { InstallPWAButton } from "@/components/pwa/install-button"
@@ -65,6 +65,7 @@ export function Sidebar() {
             { icon: Users, label: "Find Team", href: "/teams" },
             { icon: MessageCircle, label: "Messages", href: "/chat", badge: unreadCount > 0 ? unreadCount : undefined },
             { icon: User, label: "Profile", href: "/profile" },
+            ...(profile?.role === 'Admin' ? [{ icon: ShieldCheck, label: "Admin", href: "/admin/notifications" }] : [])
           ].map((item) => {
             const isActive = pathname === item.href
             return (
