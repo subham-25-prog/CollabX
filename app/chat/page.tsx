@@ -33,6 +33,16 @@ function ChatContent() {
     }
   }, [currentUser, authLoading, router])
 
+  const [chats, setChats] = useState<any[]>([])
+  const [userProfiles, setUserProfiles] = useState<Record<string, any>>({})
+  const [now, setNow] = useState(Date.now())
+
+  // Force re-render every 30s to update "online" status based on lastActive
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 30000)
+    return () => clearInterval(interval)
+  }, [])
+
   useEffect(() => {
     if (!currentUser) return
 
@@ -41,73 +51,106 @@ function ChatContent() {
       where("participants", "array-contains", currentUser.uid)
     )
 
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const chatsData = await Promise.all(
-        snapshot.docs.map(async (chatDoc) => {
-          const data = chatDoc.data()
-          
-          let otherUser: any = { name: "Unknown User", avatar: "https://api.dicebear.com/7.x/initials/svg?seed=fallback", online: false, isGroup: false }
-          let otherUserId: string | undefined
-          
-          if (data.type === 'project' && data.projectId) {
-            const projectDoc = await getDoc(doc(db, "projects", data.projectId))
-            if (projectDoc.exists()) {
-              const pData = projectDoc.data()
-              otherUser = {
-                id: data.projectId,
-                name: pData.title,
-                avatar: pData.imageUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${data.projectId}`,
-                online: true,
-                isGroup: true
-              }
-            }
-          } else {
-            // Find the other participant's ID
-            otherUserId = data.participants.find((id: string) => id !== currentUser.uid)
-            
-            if (otherUserId) {
-              const userDoc = await getDoc(doc(db, "users", otherUserId))
-              if (userDoc.exists()) {
-                const userData = userDoc.data()
-                const lastActive = userData.lastActive?.toDate()
-                const isOnline = lastActive ? (new Date().getTime() - lastActive.getTime()) < 2 * 60 * 1000 : false
-                
-                otherUser = {
-                  id: otherUserId,
-                  name: userData.name,
-                  avatar: userData.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherUserId}`,
-                  online: isOnline,
-                  isGroup: false
-                }
-              }
-            }
-          }
-
-          // Count unread notifications for this user/chat
-          const unreadCount = notifications.filter(
-            n => !n.read && n.type === 'message' && (n.senderId === otherUserId || n.link?.includes(`id=${chatDoc.id}`))
-          ).length
-
-          return {
-            id: chatDoc.id,
-            user: otherUser,
-            lastMessage: data.lastMessage || "No messages yet",
-            timestamp: data.updatedAt?.toDate ? formatTimeAgo(data.updatedAt.toDate()) : "Just now",
-            unread: unreadCount,
-            updatedAt: data.updatedAt?.toDate() || new Date(0)
-          }
-        })
-      )
-      
-      // Sort by updatedAt descending
-      chatsData.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-      
-      setConversations(chatsData)
-      setIsLoading(false)
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const chatsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      setChats(chatsData)
     })
 
     return () => unsubscribe()
-  }, [currentUser, notifications])
+  }, [currentUser])
+
+  // Listen to user profiles for all participants
+  useEffect(() => {
+    if (chats.length === 0) {
+      setIsLoading(false)
+      return
+    }
+
+    const otherUserIds = new Set<string>()
+    chats.forEach(chat => {
+      chat.participants?.forEach((id: string) => {
+        if (id !== currentUser?.uid) otherUserIds.add(id)
+      })
+    })
+
+    const unsubscribes: (() => void)[] = []
+
+    otherUserIds.forEach(userId => {
+      const unsub = onSnapshot(doc(db, "users", userId), (userDoc) => {
+        if (userDoc.exists()) {
+          setUserProfiles(prev => ({
+            ...prev,
+            [userId]: { ...userDoc.data(), id: userId }
+          }))
+        }
+      })
+      unsubscribes.push(unsub)
+    })
+
+    setIsLoading(false)
+    return () => unsubscribes.forEach(unsub => unsub())
+  }, [chats, currentUser])
+
+  // Derive conversations from chats and userProfiles
+  useEffect(() => {
+    const getConversations = async () => {
+      const data = await Promise.all(chats.map(async (chat) => {
+        let otherUser: any = { name: "Unknown User", avatar: "https://api.dicebear.com/7.x/initials/svg?seed=fallback", online: false, isGroup: false }
+        let otherUserId: string | undefined
+
+        if (chat.type === 'project' && chat.projectId) {
+          const projectDoc = await getDoc(doc(db, "projects", chat.projectId))
+          if (projectDoc.exists()) {
+            const pData = projectDoc.data()
+            otherUser = {
+              id: chat.projectId,
+              name: pData.title,
+              avatar: pData.imageUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${chat.projectId}`,
+              online: true,
+              isGroup: true
+            }
+          }
+        } else {
+          otherUserId = chat.participants?.find((id: string) => id !== currentUser?.uid)
+          const userData = otherUserId ? userProfiles[otherUserId] : null
+          
+          if (userData) {
+            const lastActive = userData.lastActive?.toDate()
+            const isOnline = lastActive ? (Date.now() - lastActive.getTime()) < 60 * 1000 : false
+            
+            otherUser = {
+              id: otherUserId,
+              name: userData.name,
+              avatar: userData.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherUserId}`,
+              online: isOnline,
+              isGroup: false
+            }
+          }
+        }
+
+        const unreadCount = notifications.filter(
+          n => !n.read && n.type === 'message' && (n.senderId === otherUserId || n.link?.includes(`id=${chat.id}`))
+        ).length
+
+        return {
+          id: chat.id,
+          user: otherUser,
+          lastMessage: chat.lastMessage || "No messages yet",
+          timestamp: chat.updatedAt?.toDate ? formatTimeAgo(chat.updatedAt.toDate()) : "Just now",
+          unread: unreadCount,
+          updatedAt: chat.updatedAt?.toDate() || new Date(0)
+        }
+      }))
+
+      data.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+      setConversations(data)
+    }
+
+    getConversations()
+  }, [chats, userProfiles, notifications, currentUser, now])
 
   const handleSelectChat = async (chatId: string) => {
     setSelectedChat(chatId)
