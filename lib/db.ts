@@ -14,7 +14,8 @@ import {
   increment,
   getDoc,
   deleteDoc,
-  writeBatch
+  writeBatch,
+  limit
 } from "firebase/firestore"
 
 // POSTS
@@ -513,4 +514,33 @@ export async function reportUser(reporterId: string, reportedId: string, reason:
 export async function deleteChat(chatId: string) {
   const chatRef = doc(db, "chats", chatId)
   await deleteDoc(chatRef)
+}
+
+// CELEBRATIONS
+export async function createCelebration(author: { id: string, name: string, avatar: string }, content: string, imageUrl: string, type: string = 'birthday') {
+  return await addDoc(collection(db, "celebrations"), {
+    author,
+    content,
+    imageUrl,
+    type,
+    likes: [],
+    timestamp: serverTimestamp()
+  })
+}
+
+export async function toggleLikeCelebration(celebrationId: string, userId: string, isLiked: boolean) {
+  const celebrationRef = doc(db, "celebrations", celebrationId)
+  if (isLiked) {
+    return await updateDoc(celebrationRef, {
+      likes: arrayRemove(userId)
+    })
+  } else {
+    return await updateDoc(celebrationRef, {
+      likes: arrayUnion(userId)
+    })
+  }
+}
+
+export async function deleteCelebration(celebrationId: string) {
+  return await deleteDoc(doc(db, "celebrations", celebrationId))
 }

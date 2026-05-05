@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 const CreatePostModal = dynamic(() => import("@/components/feed/create-post-modal").then(mod => mod.CreatePostModal), { ssr: false })
 const PostCommentsModal = dynamic(() => import("@/components/feed/post-comments-modal").then(mod => mod.PostCommentsModal), { ssr: false })
+const CelebrationsWidget = dynamic(() => import("@/components/celebrations/celebrations-widget").then(mod => mod.CelebrationsWidget), { ssr: false })
 import { collection, query, orderBy, onSnapshot, doc, setDoc, addDoc, serverTimestamp, limit, getDocs, startAfter, where } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Loader2, Image, Smile, BarChart2 } from "lucide-react"
@@ -226,8 +227,10 @@ function FeedContent() {
       <div className="flex">
         <Sidebar />
         
-        <main className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8">
-          <div className="max-w-[620px] mx-auto px-0 sm:px-4 py-2 sm:py-6">
+        <main className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 flex justify-center">
+          <div className="w-full max-w-[1000px] flex gap-8 px-0 sm:px-6 py-2 sm:py-6">
+            {/* Feed Main Column */}
+            <div className="flex-1 max-w-[620px] mx-auto xl:mx-0">
             {/* Create post trigger - Desktop */}
             <motion.div
               whileHover={{ y: -2 }}
@@ -344,7 +347,28 @@ function FeedContent() {
                   </div>
                 )}
               </div>
-            )}
+            </div>
+
+            {/* Right Sidebar - Desktop Only */}
+            <div className="hidden xl:block w-80 shrink-0 space-y-6">
+              <CelebrationsWidget />
+              
+              <div className="glass rounded-2xl p-4 border border-border/50">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Trending Projects</h3>
+                <div className="space-y-4">
+                  <p className="text-xs text-muted-foreground text-center py-4">No active projects to show right now.</p>
+                </div>
+              </div>
+
+              <div className="px-4 text-[11px] text-muted-foreground space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <a href="#" className="hover:underline">Privacy Policy</a>
+                  <a href="#" className="hover:underline">Terms of Service</a>
+                  <a href="#" className="hover:underline">Cookie Policy</a>
+                </div>
+                <p>© 2026 CollabX. All rights reserved.</p>
+              </div>
+            </div>
           </div>
         </main>
       </div>
