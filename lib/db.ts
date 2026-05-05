@@ -437,8 +437,25 @@ export async function markNotificationRead(userId: string, notificationId: strin
   })
 }
 
-export async function deletePost(postId: string) {
+export async function deletePost(postId: string, deletedByAdmin: boolean = false, adminId?: string) {
   const postRef = doc(db, "posts", postId)
+  
+  if (deletedByAdmin && adminId) {
+    const postSnap = await getDoc(postRef)
+    if (postSnap.exists()) {
+      const postData = postSnap.data()
+      if (postData.author.id !== adminId) {
+        await createNotification(postData.author.id, {
+          type: 'warning',
+          title: 'Post Deleted by Admin',
+          message: `Your post was deleted by an admin for violating community guidelines.`,
+          link: `/`,
+          senderId: adminId
+        })
+      }
+    }
+  }
+
   return await deleteDoc(postRef)
 }
 

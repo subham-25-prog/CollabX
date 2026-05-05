@@ -139,7 +139,7 @@ function ProfileContent() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
-                    <PostCard post={post as any} />
+                    <PostCard post={post as any} onDelete={(postId) => setUserPosts(prev => prev.filter(p => p.id !== postId))} />
                   </motion.div>
                 ))
               )}

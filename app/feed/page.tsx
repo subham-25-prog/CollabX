@@ -193,6 +193,11 @@ function FeedContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleDeletePost = (postId: string) => {
+    setPosts(prev => prev.filter(p => p.id !== postId));
+    setNewPosts(prev => prev.filter(p => p.id !== postId));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar onCreatePost={() => setShowCreatePost(true)} />
@@ -281,7 +286,7 @@ function FeedContent() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
                       >
-                        <PostCard post={post as any} />
+                        <PostCard post={post as any} onDelete={handleDeletePost} />
                       </motion.div>
                     )
                   } else {
@@ -292,7 +297,7 @@ function FeedContent() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
                       >
-                        <PostCard post={post as any} />
+                        <PostCard post={post as any} onDelete={handleDeletePost} />
                       </motion.div>
                     )
                   }

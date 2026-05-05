@@ -33,9 +33,10 @@ interface PostCardProps {
       votedUsers: { [userId: string]: string }
     }
   }
+  onDelete?: (postId: string) => void
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onDelete }: PostCardProps) {
   const { profile } = useAuth()
   
   const isLiked = profile ? post.likes.includes(profile.uid) : false
@@ -142,13 +143,15 @@ export function PostCard({ post }: PostCardProps) {
                   <LinkIcon className="w-4 h-4" /> Copy Link
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator className="h-px bg-border my-1" />
-                {profile?.uid === post.author.id ? (
+                {profile?.uid === post.author.id || profile?.role === 'Admin' ? (
                   <DropdownMenu.Item 
                     className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-default hover:bg-destructive/10 focus:bg-destructive/10 text-destructive"
                     onClick={async () => {
                       if (confirm("Are you sure you want to delete this post?")) {
                         try {
-                          await deletePost(post.id)
+                          const isAdmin = profile?.role === 'Admin' && profile?.uid !== post.author.id;
+                          await deletePost(post.id, isAdmin, profile?.uid)
+                          if (onDelete) onDelete(post.id);
                           toast.success("Post deleted successfully")
                         } catch (error) {
                           toast.error("Failed to delete post")
