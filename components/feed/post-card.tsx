@@ -191,7 +191,7 @@ export function PostCard({ post }: PostCardProps) {
                   src={img}
                   alt={`Post image ${i+1}`}
                   fill
-                  className="object-cover"
+                  className="object-contain bg-black"
                 />
               </div>
             ))}
@@ -232,14 +232,14 @@ export function PostCard({ post }: PostCardProps) {
               <video
                 src={post.image}
                 controls
-                className="absolute inset-0 w-full h-full object-cover bg-black"
+                className="absolute inset-0 w-full h-full object-contain bg-black"
               />
             ) : (
               <Image
                 src={post.image}
                 alt="Post media"
                 fill
-                className="object-cover"
+                className="object-contain bg-black"
               />
             )}
           </motion.div>
@@ -352,7 +352,7 @@ export function PostCard({ post }: PostCardProps) {
       {/* Content (Caption) */}
       {(post.content || !post.image) && (
         <div className="px-4 pb-1">
-          <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words">
             <Link href={`/profile?id=${post.author.id}`} className="font-semibold hover:underline mr-2">
               {post.author.name}
             </Link>

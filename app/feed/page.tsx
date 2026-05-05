@@ -76,8 +76,27 @@ function FeedContent() {
     const hoursOld = (Date.now() - postDate.getTime()) / (1000 * 60 * 60);
     score -= (hoursOld * 0.5); 
 
+    // 5. Discovery Randomness (Instagram-style variation)
+    const randomBoost = Math.random() * 20; // 0 to 20 points
+    score += randomBoost;
+
     return score;
   }, []);
+
+  // Infinite Scroll Observer
+  const observer = React.useRef<IntersectionObserver | null>(null);
+  const lastPostElementRef = React.useCallback((node: HTMLDivElement | null) => {
+    if (isLoadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        fetchPosts(true);
+      }
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [isLoadingMore, hasMore]);
 
   const fetchPosts = async (isLoadMore = false) => {
     if (!profile) return;
@@ -251,27 +270,37 @@ function FeedContent() {
                 <p className="text-muted-foreground">No posts yet. Be the first to share something!</p>
               </div>
             ) : (
-              <div className="space-y-6">
-                {posts.map((post, index) => (
-                  <motion.div
-                    key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                  >
-                    <PostCard post={post as any} />
-                  </motion.div>
-                ))}
+              <div className="space-y-6 max-w-[470px] mx-auto w-full">
+                {posts.map((post, index) => {
+                  if (posts.length === index + 1) {
+                    return (
+                      <motion.div
+                        ref={lastPostElementRef}
+                        key={post.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.1 }}
+                      >
+                        <PostCard post={post as any} />
+                      </motion.div>
+                    )
+                  } else {
+                    return (
+                      <motion.div
+                        key={post.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.1 }}
+                      >
+                        <PostCard post={post as any} />
+                      </motion.div>
+                    )
+                  }
+                })}
                 
-                {hasMore && (
+                {isLoadingMore && (
                   <div className="flex justify-center pt-4 pb-8">
-                    <button
-                      onClick={() => fetchPosts(true)}
-                      disabled={isLoadingMore}
-                      className="px-6 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {isLoadingMore ? <Loader2 className="w-4 h-4 animate-spin" /> : "Load More Posts"}
-                    </button>
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                   </div>
                 )}
               </div>

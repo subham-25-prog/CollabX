@@ -218,22 +218,26 @@ export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
       })
 
       // Trigger notification for the other participants
-      if (chatId) {
-        const chatSnap = await getDoc(chatRef)
-        if (chatSnap.exists()) {
-          const participants = chatSnap.data().participants || []
-          for (const p of participants) {
-            if (p !== currentUser.uid) {
-              await createNotification(p, {
-                type: 'message',
-                title: 'New Message from ' + (currentUser.name || 'Student'),
-                message: imageUrl ? 'Sent an attachment' : messageText,
-                link: `/chat?id=${chatId}`,
-                senderId: currentUser.uid
-              }).catch(e => console.error("Failed to notify participant:", e))
+      try {
+        if (chatId) {
+          const chatSnap = await getDoc(chatRef)
+          if (chatSnap.exists()) {
+            const participants = chatSnap.data().participants || []
+            for (const p of participants) {
+              if (p !== currentUser.uid) {
+                await createNotification(p, {
+                  type: 'message',
+                  title: 'New Message from ' + (currentUser.name || 'Student'),
+                  message: imageUrl ? 'Sent an attachment' : messageText,
+                  link: `/chat?id=${chatId}`,
+                  senderId: currentUser.uid
+                }).catch(e => console.error("Failed to notify participant:", e))
+              }
             }
           }
         }
+      } catch (notifyError) {
+        console.error("Failed to process notifications, but message was sent.", notifyError)
       }
     } catch (error) {
       console.error("Failed to send message", error)

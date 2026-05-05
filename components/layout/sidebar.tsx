@@ -24,7 +24,7 @@ const bottomItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const { profile } = useAuth()
-  const { unreadCount } = useNotifications()
+  const { unreadCount, notifications } = useNotifications()
 
   const getAvatarImage = () => {
     const p = profile as any;
