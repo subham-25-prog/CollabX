@@ -311,33 +311,6 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
             </motion.div>
           )}
 
-          {/* Popovers */}
-          <AnimatePresence>
-            {activePopover === 'emoji' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute bottom-4 left-4 z-10 glass border border-border rounded-xl p-3 shadow-xl w-64"
-              >
-                <div className="grid grid-cols-5 gap-2">
-                  {EMOJIS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      onClick={() => {
-                        appendToContent(emoji)
-                        setActivePopover(null)
-                      }}
-                      className="text-2xl hover:bg-secondary/80 p-1.5 rounded-lg transition-colors flex items-center justify-center"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* Actions */}
@@ -361,17 +334,45 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
                 <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Media</span>
               </button>
               
-              <button
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  setActivePopover(activePopover === 'emoji' ? null : 'emoji'); 
-                }}
-                className={`p-2.5 rounded-full transition-colors relative group ${activePopover === 'emoji' ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10 text-primary'}`}
-                title="Emoji"
-              >
-                <Smile className="w-5 h-5" />
-                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Emoji</span>
-              </button>
+              <div className="relative flex items-center">
+                <button
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    setActivePopover(activePopover === 'emoji' ? null : 'emoji'); 
+                  }}
+                  className={`p-2.5 rounded-full transition-colors relative group ${activePopover === 'emoji' ? 'bg-primary/20 text-primary' : 'hover:bg-primary/10 text-primary'}`}
+                  title="Emoji"
+                >
+                  <Smile className="w-5 h-5" />
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Emoji</span>
+                </button>
+                <AnimatePresence>
+                  {activePopover === 'emoji' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute bottom-full left-0 mb-2 z-50 glass border border-border rounded-xl p-3 shadow-xl w-64 max-h-[200px] overflow-y-auto custom-scrollbar"
+                    >
+                      <div className="grid grid-cols-5 gap-2">
+                        {EMOJIS.map((emoji) => (
+                          <button
+                            key={emoji}
+                            onClick={() => {
+                              appendToContent(emoji)
+                              setActivePopover(null)
+                            }}
+                            className="text-2xl hover:bg-secondary/80 p-1.5 rounded-lg transition-colors flex items-center justify-center"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               <button
                 onClick={(e) => { e.stopPropagation(); handleMemeClick(); }}
