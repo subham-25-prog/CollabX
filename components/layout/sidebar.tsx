@@ -81,9 +81,7 @@ export function Sidebar() {
                   <item.icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>
                   {item.badge && (
-                    <span className="ml-auto flex items-center justify-center w-5 h-5 rounded-full bg-accent text-xs font-semibold text-accent-foreground">
-                      {item.badge}
-                    </span>
+                    <span className="ml-auto w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
                   )}
                 </motion.div>
               </Link>

@@ -57,9 +57,7 @@ export function MobileNav() {
                 <div className="relative">
                   <item.icon className="w-5 h-5" />
                   {item.badge && (
-                    <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 rounded-full bg-accent text-[10px] font-semibold text-accent-foreground">
-                      {item.badge}
-                    </span>
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] border border-background" />
                   )}
                 </div>
                 <span className="text-xs font-medium">{item.label}</span>
