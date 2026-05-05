@@ -82,7 +82,7 @@ function FeedContent() {
         <Sidebar />
         
         <main className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8">
-          <div className="max-w-[470px] mx-auto px-0 sm:px-4 py-2 sm:py-6">
+          <div className="max-w-[620px] mx-auto px-0 sm:px-4 py-2 sm:py-6">
             {/* Create post trigger - Desktop */}
             <motion.div
               whileHover={{ y: -2 }}
