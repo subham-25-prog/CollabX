@@ -296,7 +296,6 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
                   <img
                     src={img}
                     alt={`Selected ${i}`}
-                    unoptimized
                     className="w-full h-auto object-cover max-h-[300px] bg-black/5"
                   />
                   <button

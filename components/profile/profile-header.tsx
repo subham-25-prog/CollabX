@@ -81,6 +81,7 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
   };
 
   return (
+    <>
     <div className="relative">
       {/* Cover Image */}
       <div className="h-24 sm:h-64 relative overflow-hidden bg-secondary group">
@@ -253,9 +254,8 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
               )}
             </motion.div>
           </div>
+          </div>
         </div>
-      </div>
-
       <AnimatePresence>
         {showEditModal && (
           <EditProfileModal profile={profile} onClose={() => setShowEditModal(false)} />
@@ -264,6 +264,6 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
           <InviteProjectModal targetUser={{ id: profile.uid, name: profile.name }} onClose={() => setShowInviteModal(false)} />
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }

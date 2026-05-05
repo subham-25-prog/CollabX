@@ -33,7 +33,7 @@ export function UserCard({ user }: UserCardProps) {
   const { profile: currentUser } = useAuth()
   const [isMessaging, setIsMessaging] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
-  const isFollowing = (currentUser?.following || []).includes(user.uid)
+  const isFollowing = ((currentUser as any)?.following || []).includes(user.uid)
 
   const handleFollow = async () => {
     if (!currentUser || !user.uid) return

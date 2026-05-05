@@ -18,6 +18,8 @@ interface UserProfile {
   location: string
   achievements?: any[]
   projects?: any[]
+  following?: string[]
+  followers?: string[]
   onboardingCompleted?: boolean
 }
 

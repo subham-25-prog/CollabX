@@ -123,7 +123,7 @@ export default function NotificationsPage() {
                   Followers
                   {(profile?.followers?.length || 0) > 0 && (
                     <span className="ml-1 text-xs opacity-70">
-                      {profile.followers.length}
+                      {profile?.followers?.length}
                     </span>
                   )}
                 </button>

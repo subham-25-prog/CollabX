@@ -68,8 +68,8 @@ function FeedContent() {
       return rawPosts
     }
     
-    const followedPosts = rawPosts.filter(post => profile.following.includes(post.author?.id))
-    const otherPosts = rawPosts.filter(post => !profile.following.includes(post.author?.id))
+    const followedPosts = rawPosts.filter(post => profile.following?.includes(post.author?.id))
+    const otherPosts = rawPosts.filter(post => !profile.following?.includes(post.author?.id))
     
     return [...followedPosts, ...otherPosts]
   }, [rawPosts, profile])
