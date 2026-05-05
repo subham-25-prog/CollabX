@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/auth-provider"
 import { Home, Users, MessageCircle, User, Settings, LogOut, Sparkles } from "lucide-react"
 
 import { useNotifications } from "@/hooks/use-notifications"
+import { InstallPWAButton } from "@/components/pwa/install-button"
 
 const navItems: { icon: any; label: string; href: string; badge?: number }[] = [
   { icon: Home, label: "Home Feed", href: "/feed" },
@@ -105,6 +106,7 @@ export function Sidebar() {
             </motion.div>
           </Link>
         ))}
+        <InstallPWAButton />
       </div>
     </aside>
   )

@@ -13,6 +13,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { collection, query, getDocs, limit, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { LogoIcon } from "@/components/ui/logo"
+import { InstallPWAButton } from "@/components/pwa/install-button"
 
 interface NavbarProps {
   onCreatePost?: () => void
@@ -227,6 +228,9 @@ export function Navbar({ onCreatePost }: NavbarProps) {
                 )}
               </button>
             )}
+
+            {/* Install PWA Button */}
+            <InstallPWAButton className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium text-sm border border-primary/20" />
 
             {/* Notifications */}
             <Link href="/notifications" className="relative p-2.5 rounded-xl hover:bg-secondary/50 transition-colors outline-none block">
