@@ -134,50 +134,50 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-32 px-4 sm:px-6 relative z-10">
+      <section className="py-16 px-4 sm:px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-20">
-            <h2 className="text-3xl sm:text-5xl font-black text-foreground mb-4 sm:mb-6 tracking-tight">
-              Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">Scale.</span>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-4 tracking-tight">
+              Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">Succeed.</span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
                 icon: Search,
                 title: "Find Teammates",
-                description: "Filter by skills, roles, and experience to find the perfect match for your next hackathon or startup.",
+                description: "Filter by skills and roles to find the perfect match for your next project.",
                 color: "from-blue-500 to-cyan-500",
-                shadow: "shadow-blue-500/20"
+                shadow: "shadow-blue-500/10"
               },
               {
                 icon: Trophy,
                 title: "Post Achievements",
-                description: "Share your wins, projects, and milestones with a network of driven individuals.",
+                description: "Share your wins and milestones with a network of driven individuals.",
                 color: "from-purple-500 to-pink-500",
-                shadow: "shadow-purple-500/20"
+                shadow: "shadow-purple-500/10"
               },
               {
                 icon: Users,
                 title: "Recruit Members",
-                description: "Create team requirement posts to quickly onboard talented developers and designers.",
+                description: "Create team requirements to quickly onboard talented builders.",
                 color: "from-indigo-500 to-blue-500",
-                shadow: "shadow-indigo-500/20"
+                shadow: "shadow-indigo-500/10"
               }
             ].map((feature, i) => (
               <motion.div
                 key={i}
-                whileHover={{ y: -10, scale: 1.02 }}
-                className={`group relative rounded-3xl p-6 sm:p-8 bg-white/5 border border-white/10 backdrop-blur-xl overflow-hidden transition-all duration-500 hover:shadow-2xl ${feature.shadow}`}
+                whileHover={{ y: -5 }}
+                className={`group relative rounded-2xl p-6 bg-white/5 border border-white/10 backdrop-blur-xl overflow-hidden transition-all duration-300 hover:shadow-xl ${feature.shadow}`}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                 <div className="relative z-10">
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                    <feature.icon className="w-8 h-8 text-white" />
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                    <feature.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-4 tracking-tight">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed font-medium">
+                  <h3 className="text-xl font-bold text-foreground mb-3 tracking-tight">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed font-medium">
                     {feature.description}
                   </p>
                 </div>
@@ -188,14 +188,14 @@ export default function LandingPage() {
       </section>
 
       {/* Interface Preview Section (Feed, Teams, Chat) */}
-      <section className="py-32 px-4 sm:px-6 relative z-10 overflow-hidden bg-white/[0.02] border-y border-white/5">
+      <section className="py-20 px-4 sm:px-6 relative z-10 overflow-hidden bg-white/[0.02] border-y border-white/5">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.1),transparent_50%)] pointer-events-none" />
         
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             
             {/* Left side: UI Mockups */}
-            <div className="relative h-[450px] sm:h-[600px] w-full perspective-1000 scale-75 origin-top sm:scale-100 sm:origin-center">
+            <div className="relative h-[400px] sm:h-[500px] w-full perspective-1000 scale-75 origin-top sm:scale-90 sm:origin-center">
               
               {/* Feed Card */}
               <motion.div 
@@ -203,35 +203,32 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, x: 0, rotateY: 15 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
-                className="absolute top-0 left-0 w-[400px] rounded-2xl border border-border bg-card/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.1)] p-6 z-20"
+                className="absolute top-0 left-0 w-[350px] rounded-2xl border border-border bg-card/80 backdrop-blur-xl shadow-xl p-5 z-20"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  <Avatar className="w-12 h-12 border-2 border-indigo-500/30">
+                <div className="flex items-center gap-3 mb-3">
+                  <Avatar className="w-10 h-10 border-2 border-indigo-500/30">
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
                   <div>
-                    <h4 className="text-foreground font-bold text-lg">Alex Developer</h4>
-                    <p className="text-xs text-muted-foreground">Full Stack Engineer • 2h ago</p>
+                    <h4 className="text-foreground font-bold text-base">Alex Developer</h4>
+                    <p className="text-[10px] text-muted-foreground">Engineer • 2h ago</p>
                   </div>
                 </div>
-                <p className="text-foreground mb-4 text-sm leading-relaxed">
-                  Just launched our new AI tool at the global hackathon and won 1st place! 🏆 Huge thanks to my amazing teammates on CollabX who made this possible.
+                <p className="text-foreground mb-3 text-xs leading-relaxed">
+                  Just launched our new AI tool! 🏆 Huge thanks to my teammates on CollabX.
                 </p>
-                <div className="rounded-xl overflow-hidden mb-4 border border-border">
-                  <div className="h-32 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
-                    <Rocket className="w-12 h-12 text-indigo-400/50" />
+                <div className="rounded-xl overflow-hidden mb-3 border border-border">
+                  <div className="h-24 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
+                    <Rocket className="w-8 h-8 text-indigo-400/50" />
                   </div>
                 </div>
-                <div className="flex items-center gap-6 text-slate-400">
-                  <button className="flex items-center gap-2 hover:text-pink-500 transition-colors">
-                    <Heart className="w-5 h-5" /> <span className="text-sm">248</span>
+                <div className="flex items-center gap-4 text-slate-400">
+                  <button className="flex items-center gap-1.5 hover:text-pink-500">
+                    <Heart className="w-4 h-4" /> <span className="text-xs">248</span>
                   </button>
-                  <button className="flex items-center gap-2 hover:text-blue-500 transition-colors">
-                    <MessageCircle className="w-5 h-5" /> <span className="text-sm">42</span>
-                  </button>
-                  <button className="flex items-center gap-2 hover:text-green-500 transition-colors ml-auto">
-                    <Share2 className="w-5 h-5" />
+                  <button className="flex items-center gap-1.5 hover:text-blue-500">
+                    <MessageCircle className="w-4 h-4" /> <span className="text-xs">42</span>
                   </button>
                 </div>
               </motion.div>
@@ -242,78 +239,50 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0, rotateY: 15 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="absolute bottom-10 right-0 w-[360px] rounded-2xl border border-border bg-card/90 backdrop-blur-2xl shadow-[0_20px_50px_rgba(99,102,241,0.1)] p-6 z-30"
+                className="absolute bottom-5 right-0 w-[320px] rounded-2xl border border-border bg-card/90 backdrop-blur-2xl shadow-2xl p-5 z-30"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
-                    <Code className="w-6 h-6 text-white" />
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+                    <Code className="w-5 h-5 text-white" />
                   </div>
-                  <span className="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold border border-indigo-500/30">
-                    Hiring
-                  </span>
                 </div>
-                <h4 className="text-foreground font-bold text-xl mb-2">Frontend Wizard Needed</h4>
-                <p className="text-muted-foreground text-sm mb-4">Looking for a React expert to help build a Web3 dashboard for an upcoming hackathon.</p>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {['React', 'Tailwind', 'Web3'].map(skill => (
-                    <span key={skill} className="px-2 py-1 rounded-md bg-secondary text-foreground text-xs border border-border">
+                <h4 className="text-foreground font-bold text-lg mb-1.5">Frontend Dev Wanted</h4>
+                <p className="text-muted-foreground text-xs mb-3">Looking for a React expert to help build a Web3 dashboard.</p>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {['React', 'Tailwind'].map(skill => (
+                    <span key={skill} className="px-2 py-0.5 rounded-md bg-secondary text-foreground text-[10px] border border-border">
                       {skill}
                     </span>
                   ))}
                 </div>
-                <button className="w-full py-3 rounded-xl bg-white text-black font-bold flex items-center justify-center gap-2 hover:bg-slate-200 transition-colors">
-                  <UserPlus className="w-4 h-4" /> Apply to Join
+                <button className="w-full py-2.5 rounded-lg bg-white text-black font-bold text-sm flex items-center justify-center gap-2">
+                  <UserPlus className="w-4 h-4" /> Apply Now
                 </button>
-              </motion.div>
-
-              {/* Chat Preview (Background) */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="absolute top-20 right-10 w-[280px] rounded-2xl border border-border bg-card/80 backdrop-blur-md shadow-xl p-4 z-10"
-              >
-                <div className="flex items-center gap-3 border-b border-white/10 pb-3 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center relative">
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-500 border border-[#0A0A0F]"></span>
-                  </div>
-                  <span className="text-white text-sm font-semibold">Project Chat</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="bg-white/10 rounded-2xl rounded-tl-none p-3 text-xs text-slate-300 w-4/5">
-                    Hey! Are we still on for the meeting?
-                  </div>
-                  <div className="bg-indigo-500 rounded-2xl rounded-tr-none p-3 text-xs text-white w-4/5 ml-auto">
-                    Yes, hopping on in 5 mins! 🚀
-                  </div>
-                </div>
               </motion.div>
             </div>
 
             {/* Right side: Text content */}
-            <div className="space-y-8">
-              <h2 className="text-4xl sm:text-5xl font-black text-foreground tracking-tight">
+            <div className="space-y-6">
+              <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
                 Designed for <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Seamless Interaction.</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Smooth Interaction.</span>
               </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Experience a platform that feels like a blend of your favorite social and productivity tools. Clean aesthetics, glassmorphic elements, and instant updates keep you in the flow.
+              <p className="text-base text-muted-foreground leading-relaxed">
+                Experience a platform that feels like it was built for you. Fast, fluid, and intuitive.
               </p>
               
-              <ul className="space-y-6 mt-8">
+              <ul className="space-y-4 mt-6">
                 {[
-                  { title: "LinkedIn-style Feed", desc: "Share updates, polls, and rich media." },
-                  { title: "Smart Matching", desc: "Algorithm finds the exact skills your team lacks." },
-                  { title: "Real-time Chat", desc: "Instant messaging with your new teammates." }
+                  { title: "Smart Matching", desc: "Find skills your team lacks." },
+                  { title: "Real-time Chat", desc: "Instant messaging with teammates." }
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-4">
-                    <div className="mt-1 w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 flex-shrink-0">
-                      <ChevronRight className="w-4 h-4 text-indigo-400" />
+                  <li key={i} className="flex items-start gap-3">
+                    <div className="mt-1 w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
                     </div>
                     <div>
-                      <h4 className="text-white font-bold">{item.title}</h4>
-                      <p className="text-slate-400 text-sm">{item.desc}</p>
+                      <h4 className="text-white font-bold text-sm">{item.title}</h4>
+                      <p className="text-slate-400 text-xs">{item.desc}</p>
                     </div>
                   </li>
                 ))}
@@ -324,7 +293,7 @@ export default function LandingPage() {
       </section>
 
       {/* Call To Action */}
-      <section className="py-32 px-4 sm:px-6 relative overflow-hidden">
+      <section className="py-20 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_center,rgba(99,102,241,0.2),transparent_70%)] pointer-events-none" />
         
         <motion.div
@@ -332,60 +301,59 @@ export default function LandingPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="max-w-5xl mx-auto text-center relative z-10 border border-indigo-500/20 bg-background/60 backdrop-blur-2xl rounded-[3rem] p-12 sm:p-24 shadow-[0_0_100px_rgba(99,102,241,0.1)] overflow-hidden"
+          className="max-w-4xl mx-auto text-center relative z-10 border border-indigo-500/20 bg-background/60 backdrop-blur-2xl rounded-[2rem] p-12 sm:p-16 shadow-[0_0_80px_rgba(99,102,241,0.1)] overflow-hidden"
         >
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50" />
           
-          <h2 className="text-5xl sm:text-6xl font-black text-foreground mb-6 tracking-tight relative z-10">
+          <h2 className="text-4xl sm:text-5xl font-black text-foreground mb-4 tracking-tight relative z-10">
             Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">Launch?</span>
           </h2>
-          <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto font-medium relative z-10">
-            Join the fastest-growing network of builders, designers, and innovators. Your next big opportunity is one connection away.
+          <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto font-medium relative z-10">
+            Join the network of builders. Your next big opportunity is one connection away.
           </p>
           
           <Link 
             href="/auth"
-            className="relative group inline-flex items-center justify-center px-12 py-6 rounded-2xl font-black text-white text-xl transition-all duration-300 hover:scale-105 z-10"
+            className="relative group inline-flex items-center justify-center px-10 py-5 rounded-xl font-black text-white text-lg transition-all duration-300 hover:scale-105 z-10"
           >
-            <span className="absolute inset-0 w-full h-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 opacity-100 shadow-[0_0_50px_rgba(99,102,241,0.5)] transition-all duration-300" />
-            <span className="absolute inset-[2px] rounded-[14px] bg-gradient-to-r from-indigo-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mix-blend-overlay" />
+            <span className="absolute inset-0 w-full h-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 opacity-100 shadow-[0_0_30px_rgba(99,102,241,0.4)] transition-all duration-300" />
             <span className="relative flex items-center gap-3">
-              Get Started for Free <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+              Get Started for Free <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
             </span>
           </Link>
         </motion.div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-32 px-4 sm:px-6 relative z-10 bg-white/[0.01]">
+      <section id="contact" className="py-20 px-4 sm:px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-black text-foreground mb-8 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-6 tracking-tight">
             Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Touch.</span>
           </h2>
-          <p className="text-xl text-muted-foreground mb-12">
-            Have questions or want to partner with us? Reach out directly.
+          <p className="text-lg text-muted-foreground mb-10">
+            Have questions or want to partner? Reach out directly.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div 
               whileHover={{ y: -5 }}
-              className="glass p-8 rounded-3xl border border-white/10 flex flex-col items-center gap-4 group"
+              className="glass p-6 rounded-2xl border border-white/10 flex flex-col items-center gap-3 group"
             >
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Mail className="w-6 h-6 text-indigo-400" />
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Mail className="w-5 h-5 text-indigo-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Email Us</h3>
+              <h3 className="text-lg font-bold text-white">Email Us</h3>
               <p className="text-indigo-400 font-medium">shubhamoy27@gmail.com</p>
             </motion.div>
             
             <motion.div 
               whileHover={{ y: -5 }}
-              className="glass p-8 rounded-3xl border border-white/10 flex flex-col items-center gap-4 group"
+              className="glass p-6 rounded-2xl border border-white/10 flex flex-col items-center gap-3 group"
             >
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Phone className="w-6 h-6 text-purple-400" />
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Phone className="w-5 h-5 text-purple-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Call Us</h3>
+              <h3 className="text-lg font-bold text-white">Call Us</h3>
               <p className="text-purple-400 font-medium">+91 91444 57475</p>
             </motion.div>
           </div>

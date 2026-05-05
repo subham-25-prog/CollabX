@@ -27,6 +27,7 @@ interface ChatWindowProps {
     }
   }
   chatId: string
+  onBack?: () => void
 }
 
 const formatTime = (date: Date) => {
@@ -40,7 +41,7 @@ const getStringColor = (str: string) => {
 
 const COMMON_EMOJIS = ["😀","😂","😍","🙏","👍","🔥","❤️","✨","😢","😎","🤔","🙌"]
 
-export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
+export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
   const { profile: currentUser } = useAuth()
   const router = useRouter()
   const [messages, setMessages] = useState<any[]>([])
@@ -266,8 +267,17 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
   return (
     <div className="flex-1 flex flex-col h-full bg-background/50">
       <div className="flex items-center justify-between p-3 glass-strong border-b border-border">
-        <div className="flex items-center gap-3">
-          <Link href={`/profile?id=${conversation.user.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {onBack && (
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={onBack}
+              className="lg:hidden p-2 rounded-xl hover:bg-secondary/50 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+            </motion.button>
+          )}
+          <Link href={`/profile?id=${conversation.user.id}`} className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
             <div className="relative">
               <Image
                 src={conversation.user.avatar}

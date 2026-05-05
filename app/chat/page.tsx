@@ -233,34 +233,11 @@ function ChatContent() {
           >
             {selectedConversation ? (
               <>
-                {/* Mobile back button */}
-                <div className="lg:hidden flex items-center gap-3 p-4 border-b border-border glass-strong z-10">
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleBackToList}
-                    className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </motion.button>
-                  <img
-                    src={selectedConversation.user.avatar}
-                    alt={selectedConversation.user.name}
-                    className="w-10 h-10 rounded-full object-cover bg-secondary"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-foreground">
-                      {selectedConversation.user.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {selectedConversation.user.online ? "Online" : "Offline"}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* The ChatWindow component fetches messages itself */}
+                {/* The ChatWindow component now handles its own header and mobile back button */}
                 <ChatWindow
                   conversation={selectedConversation}
                   chatId={selectedChat!}
+                  onBack={handleBackToList}
                 />
               </>
             ) : (
