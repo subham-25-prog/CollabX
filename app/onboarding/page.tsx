@@ -79,6 +79,7 @@ export default function OnboardingPage() {
         bio: formData.bio || "I'm ready to collaborate!",
         skills: skillsArray,
         mobile: formData.mobile || "",
+        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(formData.name || "Student")}`,
         onboardingCompleted: true
       })
       

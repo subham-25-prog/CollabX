@@ -70,8 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const newProfile: UserProfile = {
               uid: firebaseUser.uid,
               email: firebaseUser.email || "",
-              name: firebaseUser.email?.split('@')[0] || "New User",
-              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${firebaseUser.uid}`,
+              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "New User",
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "New User")}`,
               role: "Student",
               bio: "Hey there! I am using CollabX.",
               skills: [],

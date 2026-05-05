@@ -416,7 +416,7 @@ export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
               <div
                 className={`relative max-w-[85%] sm:max-w-[75%] px-4 py-3 shadow-sm text-[15px] break-words overflow-hidden ${
                   message.sender === "me"
-                    ? "gradient-primary text-primary-foreground rounded-2xl rounded-br-md ml-auto"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 rounded-2xl rounded-br-md ml-auto"
                     : "glass rounded-2xl rounded-bl-md mr-auto"
                 } ${message.isSending ? 'opacity-70' : ''}`}
               >
