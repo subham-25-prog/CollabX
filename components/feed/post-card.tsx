@@ -184,14 +184,13 @@ export function PostCard({ post }: PostCardProps) {
             {post.images.map((img, i) => (
               <div 
                 key={i} 
-                className="min-w-full snap-center overflow-hidden border-y sm:border border-border relative aspect-square bg-black cursor-pointer"
+                className="min-w-full snap-center overflow-hidden border-y sm:border border-border relative aspect-square bg-secondary cursor-pointer flex items-center justify-center"
                 onClick={() => setSelectedImage(img)}
               >
-                <Image
+                <img
                   src={img}
                   alt={`Post image ${i+1}`}
-                  fill
-                  className="object-contain bg-black"
+                  className="w-full h-full object-cover"
                 />
               </div>
             ))}
@@ -225,21 +224,20 @@ export function PostCard({ post }: PostCardProps) {
       ) : post.image ? (
         <div className="px-0 sm:px-0">
           <motion.div
-            className="overflow-hidden border-y sm:border border-border relative aspect-square bg-black cursor-pointer"
+            className="overflow-hidden border-y sm:border border-border relative bg-secondary cursor-pointer flex items-center justify-center"
             onClick={() => { if (!post.image?.match(/\.(mp4|webm|mov|ogg)/i)) setSelectedImage(post.image!) }}
           >
             {post.image.match(/\.(mp4|webm|mov|ogg)/i) ? (
               <video
                 src={post.image}
                 controls
-                className="absolute inset-0 w-full h-full object-contain bg-black"
+                className="w-full max-h-[587px] object-contain bg-black"
               />
             ) : (
-              <Image
+              <img
                 src={post.image}
                 alt="Post media"
-                fill
-                className="object-contain bg-black"
+                className="w-full max-h-[587px] object-cover"
               />
             )}
           </motion.div>
