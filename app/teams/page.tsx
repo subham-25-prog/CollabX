@@ -113,18 +113,18 @@ export default function TeamsPage() {
       <div className="flex">
         <Sidebar />
         <main className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 w-full min-w-0">
-          <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="max-w-6xl mx-auto px-4 py-3 sm:py-6">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="text-center mb-8"
+            className="text-center mb-4 sm:mb-8"
           >
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1.5 sm:mb-2">
               Find Your <span className="gradient-text">Dream Team</span>
             </h1>
-            <p className="text-muted-foreground max-w-lg mx-auto">
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto">
               Connect with talented students who share your passion. Build something amazing together.
             </p>
           </motion.div>

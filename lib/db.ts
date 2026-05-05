@@ -199,7 +199,7 @@ export async function sendMessage(chatId: string, senderId: string, content: str
 }
 
 // PROJECTS
-export async function createProject(owner: { id: string, name: string, avatar: string }, title: string, description: string, skills: string[], imageUrl: string | null = null, type: 'project' | 'startup' = 'project') {
+export async function createProject(owner: { id: string, name: string, avatar: string }, title: string, description: string, skills: string[], imageUrl: string | null = null, type: 'project' | 'startup' = 'project', membersNeeded: string = "", duration: string = "", phase: string = "", commitment: string = "") {
   const projectRef = await addDoc(collection(db, "projects"), {
     owner,
     title,
@@ -207,6 +207,10 @@ export async function createProject(owner: { id: string, name: string, avatar: s
     skills,
     imageUrl,
     type,
+    membersNeeded,
+    duration,
+    phase,
+    commitment,
     members: [owner.id], // Owner is a member
     applicants: [],
     status: "open",

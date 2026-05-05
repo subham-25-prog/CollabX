@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Users, Code, Calendar, ChevronDown, CheckCircle2, XCircle, Trash2, MessageSquare } from "lucide-react"
+import { Users, Code, Calendar, ChevronDown, CheckCircle2, XCircle, Trash2, MessageSquare, Clock, Activity } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { applyToProject, acceptApplicant, rejectApplicant, acceptProjectInvite, toggleProjectStatus, deleteProject } from "@/lib/db"
 import { toast } from "sonner"
@@ -131,6 +131,47 @@ export function ProjectCard({ project, allUsers = [] }: ProjectCardProps) {
         <p className={`text-muted-foreground text-sm mb-4 ${!isExpanded && "line-clamp-2"}`}>
           {project.description}
         </p>
+
+        {(project.membersNeeded || project.duration || project.phase || project.commitment) && (
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {project.membersNeeded && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border">
+                <Users className="w-4 h-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Needed</p>
+                  <p className="text-xs font-medium text-foreground truncate">{project.membersNeeded}</p>
+                </div>
+              </div>
+            )}
+            {project.duration && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border">
+                <Calendar className="w-4 h-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Duration</p>
+                  <p className="text-xs font-medium text-foreground truncate">{project.duration}</p>
+                </div>
+              </div>
+            )}
+            {project.phase && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border">
+                <Activity className="w-4 h-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Phase</p>
+                  <p className="text-xs font-medium text-foreground truncate">{project.phase}</p>
+                </div>
+              </div>
+            )}
+            {project.commitment && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border">
+                <Clock className="w-4 h-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Commitment</p>
+                  <p className="text-xs font-medium text-foreground truncate">{project.commitment}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-2 mb-4">
           {(project.skills || []).slice(0, isExpanded ? undefined : 3).map((skill: string) => (

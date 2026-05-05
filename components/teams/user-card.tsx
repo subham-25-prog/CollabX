@@ -66,12 +66,12 @@ export function UserCard({ user }: UserCardProps) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      className="glass rounded-xl p-4 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 flex flex-col h-full"
+      whileHover={{ y: -2 }}
+      className="glass rounded-xl p-3 sm:p-4 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 flex flex-col h-full"
     >
       {/* Header with avatar and info */}
-      <div className="flex items-start gap-3 mb-3">
-        <Link href={`/profile?id=${user.uid}`}>
+      <div className="flex items-center sm:items-start gap-3 sm:mb-3">
+        <Link href={`/profile?id=${user.uid}`} className="shrink-0">
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="relative"
@@ -82,82 +82,114 @@ export function UserCard({ user }: UserCardProps) {
               width={40}
               height={40}
               unoptimized
-              className="w-10 h-10 rounded-lg object-cover ring-1 ring-transparent hover:ring-primary/30 transition-all bg-secondary"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover ring-1 ring-transparent hover:ring-primary/30 transition-all bg-secondary"
             />
           </motion.div>
         </Link>
-        <div className="flex-1 min-w-0">
-          <Link href={`/profile?id=${user.uid}`}>
-            <h3 className="text-sm font-semibold text-foreground hover:text-primary transition-colors truncate">
-              {user.name}
-            </h3>
-          </Link>
+        
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="flex items-center justify-between gap-2">
+            <Link href={`/profile?id=${user.uid}`} className="truncate">
+              <h3 className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors truncate">
+                {user.name}
+              </h3>
+            </Link>
+            <span
+              className={`hidden sm:inline-block px-2 py-0.5 rounded-md text-[10px] font-medium border shrink-0 ${availabilityClass}`}
+            >
+              {availabilityStatus}
+            </span>
+          </div>
           <p className="text-xs text-muted-foreground truncate">{user.role}</p>
-          <div className="flex items-center gap-1.5 mt-0.5">
+          <div className="hidden sm:flex items-center gap-1.5 mt-0.5">
             <MapPin className="w-3 h-3 text-muted-foreground" />
             <span className="text-[10px] text-muted-foreground">{user.location || "Earth"}</span>
           </div>
         </div>
-        <span
-          className={`px-2 py-0.5 rounded-md text-[10px] font-medium border ${availabilityClass}`}
-        >
-          {availabilityStatus}
-        </span>
-      </div>
 
-      {/* Bio */}
-      <p className="text-xs text-muted-foreground leading-relaxed mb-3 line-clamp-2 flex-1">
-        {user.bio || "No bio provided."}
-      </p>
-
-      {/* Skills */}
-      <div className="flex flex-wrap gap-1 mb-3 min-h-[24px]">
-        {(user.skills || []).slice(0, 3).map((skill) => (
-          <span
-            key={skill}
-            className="px-2 py-0.5 rounded-md bg-secondary/50 text-secondary-foreground text-[10px] font-medium"
-          >
-            {skill}
-          </span>
-        ))}
-        {(user.skills || []).length > 3 && (
-          <span className="px-2 py-0.5 rounded-md bg-secondary/50 text-muted-foreground text-[10px] font-medium">
-            +{(user.skills || []).length - 3}
-          </span>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 mt-auto">
-        {currentUser?.uid !== user.uid ? (
+        {/* Mobile Actions (Hidden on Desktop) */}
+        <div className="sm:hidden flex items-center gap-1.5 shrink-0">
+          {currentUser?.uid !== user.uid ? (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={handleFollow}
+              disabled={isFollowLoading}
+              className={`p-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
+                isFollowing 
+                  ? "bg-secondary text-secondary-foreground" 
+                  : "bg-primary text-primary-foreground"
+              }`}
+            >
+              {isFollowLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+            </motion.button>
+          ) : null}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleFollow}
-            disabled={isFollowLoading}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
-              isFollowing 
-                ? "bg-secondary text-secondary-foreground hover:bg-secondary/80" 
-                : "gradient-primary text-primary-foreground shadow-sm shadow-primary/20"
-            }`}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleMessage}
+            disabled={isMessaging || currentUser?.uid === user.uid}
+            className="p-2 rounded-lg bg-secondary text-secondary-foreground transition-colors disabled:opacity-50"
           >
-            {isFollowLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserPlus className="w-3 h-3" />}
-            {isFollowing ? "Following" : "Follow"}
+            {isMessaging ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
           </motion.button>
-        ) : (
-          <div className="flex-1 py-2 rounded-lg bg-secondary text-secondary-foreground text-center text-xs font-medium">
-            You
-          </div>
-        )}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleMessage}
-          disabled={isMessaging || currentUser?.uid === user.uid}
-          className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors disabled:opacity-50"
-        >
-          {isMessaging ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
-        </motion.button>
+        </div>
+      </div>
+
+      {/* Desktop Only Content */}
+      <div className="hidden sm:flex flex-col flex-1">
+        {/* Bio */}
+        <p className="text-xs text-muted-foreground leading-relaxed mb-3 line-clamp-2 flex-1">
+          {user.bio || "No bio provided."}
+        </p>
+
+        {/* Skills */}
+        <div className="flex flex-wrap gap-1 mb-3 min-h-[24px]">
+          {(user.skills || []).slice(0, 3).map((skill) => (
+            <span
+              key={skill}
+              className="px-2 py-0.5 rounded-md bg-secondary/50 text-secondary-foreground text-[10px] font-medium"
+            >
+              {skill}
+            </span>
+          ))}
+          {(user.skills || []).length > 3 && (
+            <span className="px-2 py-0.5 rounded-md bg-secondary/50 text-muted-foreground text-[10px] font-medium">
+              +{(user.skills || []).length - 3}
+            </span>
+          )}
+        </div>
+
+        {/* Desktop Actions */}
+        <div className="flex items-center gap-2 mt-auto">
+          {currentUser?.uid !== user.uid ? (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleFollow}
+              disabled={isFollowLoading}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
+                isFollowing 
+                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/80" 
+                  : "gradient-primary text-primary-foreground shadow-sm shadow-primary/20"
+              }`}
+            >
+              {isFollowLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserPlus className="w-3 h-3" />}
+              {isFollowing ? "Following" : "Follow"}
+            </motion.button>
+          ) : (
+            <div className="flex-1 py-2 rounded-lg bg-secondary text-secondary-foreground text-center text-xs font-medium">
+              You
+            </div>
+          )}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleMessage}
+            disabled={isMessaging || currentUser?.uid === user.uid}
+            className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors disabled:opacity-50"
+          >
+            {isMessaging ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   )
