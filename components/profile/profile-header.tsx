@@ -198,11 +198,15 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
                 className="flex items-center gap-6 mt-6"
               >
                 <div className="text-center">
-                  <p className="text-xl font-bold text-foreground">{(profile.projects || []).length}</p>
+                  <p className="text-xl font-bold text-foreground">{profile.postsCount || 0}</p>
+                  <p className="text-sm text-muted-foreground">Posts</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-foreground">{profile.projectsCount || 0}</p>
                   <p className="text-sm text-muted-foreground">Projects</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xl font-bold text-foreground">{(profile.teams || []).length}</p>
+                  <p className="text-xl font-bold text-foreground">{profile.teamsCount || 0}</p>
                   <p className="text-sm text-muted-foreground">Teams</p>
                 </div>
               </motion.div>

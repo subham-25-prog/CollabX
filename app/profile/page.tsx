@@ -23,6 +23,7 @@ function ProfileContent() {
   const [activeTab, setActiveTab] = useState("posts")
   const [profile, setProfile] = useState<any>(null)
   const [userPosts, setUserPosts] = useState<any[]>([])
+  const [userTeams, setUserTeams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -56,17 +57,23 @@ function ProfileContent() {
 
         // Fetch posts for this user
         if (targetUserId) {
-          const q = query(
+          const postsQuery = query(
             collection(db, "posts"),
             where("author.id", "==", targetUserId),
             orderBy("timestamp", "desc")
           )
-          const querySnapshot = await getDocs(q)
-          const postsData = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }))
-          setUserPosts(postsData)
+          const postsSnapshot = await getDocs(postsQuery)
+          setUserPosts(postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+
+          // Fetch teams/collaborations from projects collection
+          const teamsQuery = query(
+            collection(db, "projects"),
+            where("members", "array-contains", targetUserId),
+            orderBy("createdAt", "desc")
+          )
+          const teamsSnapshot = await getDocs(teamsQuery)
+          const teamsData = teamsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+          setUserTeams(teamsData)
         }
       } catch (error) {
         console.error("Error fetching profile:", error)
@@ -100,10 +107,27 @@ function ProfileContent() {
 
   return (
     <main className="pt-16 pb-20 lg:pb-8">
-      <ProfileHeader profile={profile} isOwnProfile={isOwnProfile} />
+      <ProfileHeader 
+        profile={{
+          ...profile,
+          postsCount: userPosts.length,
+          teamsCount: userTeams.length,
+          projectsCount: (profile.projects || []).length
+        }} 
+        isOwnProfile={isOwnProfile} 
+      />
       
       <div className="max-w-4xl mx-auto px-4 mt-6">
-        <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <ProfileTabs 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+          counts={{
+            posts: userPosts.length,
+            achievements: (profile.achievements || []).length,
+            projects: (profile.projects || []).length,
+            teams: userTeams.length
+          }}
+        />
         
         {/* Content based on active tab */}
         <div className="mt-6">
@@ -188,6 +212,53 @@ function ProfileContent() {
                           </span>
                         ))}
                       </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          )}
+          
+          {activeTab === "teams" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {userTeams.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 col-span-2">No team collaborations yet.</p>
+              ) : (
+                userTeams.map((project: any, index: number) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <div className="glass rounded-2xl p-4 border border-border/50 hover:border-primary/30 transition-colors">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-bold text-foreground">{project.title}</h3>
+                          <p className="text-xs text-muted-foreground">{project.type || 'Project'}</p>
+                        </div>
+                        <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase ${project.status === 'open' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                          {project.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{project.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex -space-x-2">
+                          {(project.members || []).slice(0, 3).map((mId: string, i: number) => (
+                            <img key={i} src={`https://api.dicebear.com/7.x/initials/svg?seed=${mId}`} className="w-6 h-6 rounded-full border-2 border-background" alt="" />
+                          ))}
+                        </div>
+                        <Link href={`/teams?project=${project.id}`} className="text-xs font-semibold text-primary hover:underline">
+                          View Team
+                        </Link>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
                     </div>
                   </motion.div>
                 ))

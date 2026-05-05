@@ -13,13 +13,15 @@ const tabs: { id: string; label: string; icon: any; count?: number }[] = [
 interface ProfileTabsProps {
   activeTab: string
   onTabChange: (tab: string) => void
+  counts?: Record<string, number>
 }
 
-export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
+export function ProfileTabs({ activeTab, onTabChange, counts }: ProfileTabsProps) {
   return (
     <div className="flex items-center justify-between sm:justify-start gap-1 p-1.5 glass rounded-2xl overflow-x-auto scrollbar-hide">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id
+        const count = counts ? counts[tab.id] : undefined
         return (
           <button
             key={tab.id}
@@ -32,13 +34,13 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
           >
             <tab.icon className="w-6 h-6 sm:w-4 sm:h-4 transition-transform duration-300" />
             <span className="sm:inline">{tab.label}</span>
-            {tab.count !== undefined && (
+            {count !== undefined && (
               <span className={`hidden sm:inline-block px-2 py-0.5 rounded-full text-xs ${
                 isActive 
                   ? "bg-primary/10 text-primary" 
                   : "bg-secondary text-secondary-foreground"
               }`}>
-                {tab.count}
+                {count}
               </span>
             )}
             {isActive && (
