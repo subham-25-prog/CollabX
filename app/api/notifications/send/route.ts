@@ -7,7 +7,22 @@ export async function POST(request: Request) {
 
     let targetTokens: string[] = tokens || [];
 
+    // Security Check: Only Admins can use sendToAll
     if (sendToAll) {
+      const authHeader = request.headers.get("Authorization");
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return NextResponse.json({ error: "Unauthorized: Missing Admin token" }, { status: 401 });
+      }
+
+      const idToken = authHeader.split("Bearer ")[1];
+      const decodedToken = await adminAuth.verifyIdToken(idToken);
+      const userDoc = await adminDb.collection("users").doc(decodedToken.uid).get();
+      const userData = userDoc.data();
+
+      if (!userData || userData.role !== 'Admin') {
+        return NextResponse.json({ error: "Forbidden: Admin role required for blast" }, { status: 403 });
+      }
+
       // Fetch all users and aggregate their fcmTokens
       const usersSnap = await adminDb.collection("users").get();
       usersSnap.forEach((doc) => {

@@ -8,6 +8,7 @@ import { Send, Bell, Info, ShieldCheck, Loader2, CheckCircle2, AlertCircle } fro
 import { useAuth } from "@/components/auth/auth-provider"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { auth } from "@/lib/firebase"
 
 export default function AdminNotificationsPage() {
   const { profile, isLoading: isAuthLoading } = useAuth()
@@ -40,9 +41,14 @@ export default function AdminNotificationsPage() {
     setStatus('idle')
 
     try {
+      const idToken = await auth.currentUser?.getIdToken()
+      
       const response = await fetch("/api/notifications/send", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
         body: JSON.stringify({
           title,
           body: message,

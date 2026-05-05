@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
-import { Search, Bell, Plus, X, MessageSquare, Heart, Users, CheckCircle, XCircle, Info, Loader2 } from "lucide-react"
+import { Search, Bell, Plus, X, MessageSquare, Heart, Users, CheckCircle, XCircle, Info, Loader2, ShieldCheck } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { useNotifications, Notification } from "@/hooks/use-notifications"
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
@@ -231,6 +231,13 @@ export function Navbar({ onCreatePost }: NavbarProps) {
 
             {/* Install PWA Button */}
             <InstallPWAButton className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium text-sm border border-primary/20" />
+
+            {/* Admin Icon for Mobile */}
+            {profile?.role === 'Admin' && (
+              <Link href="/admin/notifications" className="md:hidden p-2.5 rounded-xl hover:bg-secondary/50 transition-colors">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+              </Link>
+            )}
 
             {/* Notifications */}
             <Link href="/notifications" className="relative p-2.5 rounded-xl hover:bg-secondary/50 transition-colors outline-none block">

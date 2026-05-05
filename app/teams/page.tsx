@@ -24,7 +24,8 @@ export default function TeamsPage() {
   const [users, setUsers] = useState<any[]>([])
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<"students" | "projects" | "my_projects" | "startups">("projects")
+  const [activeTab, setActiveTab] = useState<"projects" | "my_projects" | "startups" | "students">("projects")
+  const [direction, setDirection] = useState(0) // -1 for left, 1 for right
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -32,35 +33,31 @@ export default function TeamsPage() {
   const [selectedAvailability, setSelectedAvailability] = useState<string | null>(null)
   const [displayLimit, setDisplayLimit] = useState(20)
 
-  // Swipe gesture state
-  const [touchStart, setTouchStart] = useState<number | null>(null)
-  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const tabs = ["projects", "my_projects", "startups", "students"] as const
+
+  const handleTabChange = (newTab: typeof tabs[number]) => {
+    const currentIndex = tabs.indexOf(activeTab)
+    const newIndex = tabs.indexOf(newTab)
+    setDirection(newIndex > currentIndex ? 1 : -1)
+    setActiveTab(newTab)
+  }
   const minSwipeDistance = 50
 
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null)
-    setTouchStart(e.targetTouches[0].clientX)
-  }
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX)
-  }
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > minSwipeDistance
-    const isRightSwipe = distance < -minSwipeDistance
-
-    const tabs = ["projects", "my_projects", "startups", "students"] as const
-    const currentIndex = tabs.indexOf(activeTab)
-
-    if (isLeftSwipe && currentIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentIndex + 1])
-    }
-    if (isRightSwipe && currentIndex > 0) {
-      setActiveTab(tabs[currentIndex - 1])
-    }
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0
+    })
   }
 
   // Reset display limit when tab changes
@@ -145,9 +142,6 @@ export default function TeamsPage() {
         <Sidebar />
         <main 
           className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 w-full min-w-0"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
         >
           <div className="max-w-6xl mx-auto px-4 py-3 sm:py-6">
           {/* Header */}
@@ -172,47 +166,59 @@ export default function TeamsPage() {
             transition={{ duration: 0.4, delay: 0.05 }}
             className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6"
           >
-            <div className="flex flex-nowrap overflow-x-auto custom-scrollbar p-1 rounded-xl bg-secondary/50 backdrop-blur-md gap-1 max-w-full w-full sm:w-auto">
+            <div className="flex flex-nowrap overflow-x-auto custom-scrollbar p-1 rounded-xl bg-secondary/50 backdrop-blur-md gap-1 max-w-full w-full sm:w-auto relative">
               <button
-                onClick={() => setActiveTab("projects")}
-                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                onClick={() => handleTabChange("projects")}
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative z-10 ${
                   activeTab === "projects" 
-                    ? "bg-background text-foreground shadow-sm" 
+                    ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <FolderKanban className="w-4 h-4" /> Projects
               </button>
               <button
-                onClick={() => setActiveTab("my_projects")}
-                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                onClick={() => handleTabChange("my_projects")}
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative z-10 ${
                   activeTab === "my_projects" 
-                    ? "bg-background text-foreground shadow-sm" 
+                    ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <FolderKanban className="w-4 h-4" /> My Projects
               </button>
               <button
-                onClick={() => setActiveTab("startups")}
-                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                onClick={() => handleTabChange("startups")}
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative z-10 ${
                   activeTab === "startups" 
-                    ? "bg-background text-foreground shadow-sm" 
+                    ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Lightbulb className="w-4 h-4" /> Startup Ideas
               </button>
               <button
-                onClick={() => setActiveTab("students")}
-                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                onClick={() => handleTabChange("students")}
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative z-10 ${
                   activeTab === "students" 
-                    ? "bg-background text-foreground shadow-sm" 
+                    ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <UsersIcon className="w-4 h-4" /> Students
               </button>
+              
+              {/* Sliding Background for Tabs */}
+              <motion.div
+                layoutId="activeTabBg"
+                className="absolute h-[calc(100%-8px)] rounded-lg bg-background shadow-sm z-0 top-1 bottom-1"
+                initial={false}
+                animate={{
+                  left: activeTab === "projects" ? 4 : activeTab === "my_projects" ? 110 : activeTab === "startups" ? 230 : 360,
+                  width: activeTab === "projects" ? 100 : activeTab === "my_projects" ? 120 : activeTab === "startups" ? 130 : 110
+                }}
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
             </div>
 
             {(activeTab === "projects" || activeTab === "my_projects" || activeTab === "startups") && (
@@ -300,71 +306,89 @@ export default function TeamsPage() {
             </motion.p>
           )}
 
-          {/* Grid */}
-          {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            <>
-              {activeTab === "students" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {filteredUsers.slice(0, displayLimit).map((user, index) => (
-                    <motion.div
-                      key={user.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: (index % 20) * 0.05 }}
-                    >
-                      <UserCard user={{...user, uid: user.id} as any} />
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredProjects.slice(0, displayLimit).map((project, index) => (
-                    <motion.div
-                      key={project.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: (index % 20) * 0.05 }}
-                    >
-                      <ProjectCard project={project} allUsers={users} />
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-
-              {/* Load More Button */}
-              {((activeTab === "students" && filteredUsers.length > displayLimit) || 
-                (activeTab !== "students" && filteredProjects.length > displayLimit)) && (
-                <div className="flex justify-center mt-8">
-                  <button
-                    onClick={() => setDisplayLimit(prev => prev + 20)}
-                    className="px-6 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium transition-colors"
-                  >
-                    Load More
-                  </button>
-                </div>
-              )}
-
-              {/* Empty state */}
-              {((activeTab === "students" && filteredUsers.length === 0) || 
-                ((activeTab === "projects" || activeTab === "my_projects" || activeTab === "startups") && filteredProjects.length === 0)) && (
-                <motion.div
+          <div className="overflow-hidden relative min-h-[400px]">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              {isLoading ? (
+                <motion.div 
+                  key="loading"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-16"
+                  exit={{ opacity: 0 }}
+                  className="flex justify-center items-center py-12 absolute inset-0"
                 >
-                  <div className="w-16 h-16 rounded-2xl gradient-primary mx-auto mb-4 flex items-center justify-center opacity-50">
-                    <Search className="w-8 h-8 text-primary-foreground" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">No results found</h3>
-                  <p className="text-muted-foreground">Try adjusting your search or filters</p>
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={activeTab}
+                  custom={direction}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{
+                    x: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 }
+                  }}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={(e, { offset, velocity }) => {
+                    const swipe = Math.abs(offset.x) > 50 || Math.abs(velocity.x) > 500
+                    if (swipe) {
+                      const currentIndex = tabs.indexOf(activeTab)
+                      if (offset.x > 0 && currentIndex > 0) {
+                        handleTabChange(tabs[currentIndex - 1])
+                      } else if (offset.x < 0 && currentIndex < tabs.length - 1) {
+                        handleTabChange(tabs[currentIndex + 1])
+                      }
+                    }
+                  }}
+                  className="w-full"
+                >
+                  {activeTab === "students" ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
+                      {filteredUsers.slice(0, displayLimit).map((user, index) => (
+                        <motion.div
+                          key={user.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: (index % 20) * 0.05 }}
+                        >
+                          <UserCard user={{...user, uid: user.id} as any} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1">
+                      {filteredProjects.slice(0, displayLimit).map((project, index) => (
+                        <motion.div
+                          key={project.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: (index % 20) * 0.05 }}
+                        >
+                          <ProjectCard project={project} allUsers={users} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Empty state inside the motion container */}
+                  {((activeTab === "students" && filteredUsers.length === 0) || 
+                    ((activeTab === "projects" || activeTab === "my_projects" || activeTab === "startups") && filteredProjects.length === 0)) && (
+                    <div className="text-center py-16">
+                      <div className="w-16 h-16 rounded-2xl gradient-primary mx-auto mb-4 flex items-center justify-center opacity-50">
+                        <Search className="w-8 h-8 text-primary-foreground" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground mb-1">No results found</h3>
+                      <p className="text-muted-foreground">Try adjusting your search or filters</p>
+                    </div>
+                  )}
                 </motion.div>
               )}
-            </>
-          )}
+            </AnimatePresence>
+          </div>
         </div>
         </main>
       </div>

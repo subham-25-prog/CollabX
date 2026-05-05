@@ -124,10 +124,13 @@ export async function getAllUsers() {
 }
 
 export async function updateUserProfile(userId: string, data: any) {
+  // Security: Prevent users from changing their own role to Admin through the UI
+  const { role, ...safeData } = data
+  
   const userRef = doc(db, "users", userId)
   const batch = writeBatch(db)
   
-  batch.update(userRef, data)
+  batch.update(userRef, safeData)
 
   if (data.name !== undefined || data.avatar !== undefined || data.role !== undefined) {
     const postsQuery = query(collection(db, "posts"), where("author.id", "==", userId))
