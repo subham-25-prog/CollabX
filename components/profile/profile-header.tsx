@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { MapPin, Calendar, Link as LinkIcon, MessageCircle, UserPlus, Edit3, Settings } from "lucide-react"
+import { MapPin, Calendar, Link as LinkIcon, MessageCircle, UserPlus, Edit3, Settings, ArrowLeft } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -83,6 +83,14 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
   return (
     <>
     <div className="relative">
+      {/* Back Button */}
+      <button 
+        onClick={() => router.back()}
+        className="absolute top-4 left-4 z-10 p-2 bg-background/50 backdrop-blur-md rounded-full text-foreground hover:bg-background/80 transition-colors shadow-sm"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
+
       {/* Cover Image */}
       <div className="h-24 sm:h-64 relative overflow-hidden bg-secondary group">
         <Image
@@ -166,7 +174,9 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4" />
-                  Joined Recently
+                  {profile.createdAt 
+                    ? `Joined ${new Date(profile.createdAt?.seconds ? profile.createdAt.seconds * 1000 : profile.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                    : "Joined Recently"}
                 </span>
                 <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
                   {profile.role || "Student"}
