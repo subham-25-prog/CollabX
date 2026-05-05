@@ -197,15 +197,15 @@ function ChatContent() {
   const selectedConversation = conversations.find((c) => c.id === selectedChat)
 
   return (
-    <div className="min-h-screen bg-background flex flex-col h-[100dvh] overflow-hidden">
-      <div className={!isMobileListVisible ? "hidden lg:block" : ""}>
+    <div className="fixed inset-0 bg-background flex flex-col overflow-hidden">
+      <div className={`${!isMobileListVisible ? "hidden lg:block" : ""} shrink-0`}>
         <Navbar />
       </div>
-      <div className="flex flex-1 overflow-hidden h-full">
+      <div className="flex-1 flex overflow-hidden relative">
         <Sidebar />
-        <div className="flex-1 lg:ml-64 w-full min-w-0 flex flex-col h-full relative">
-          <main className={`${isMobileListVisible ? 'pt-16 pb-20' : 'pt-0 pb-0'} lg:pt-16 lg:pb-0 flex-1 flex flex-col h-full overflow-hidden`}>
-            <div className="flex-1 flex overflow-hidden h-full">
+        <div className="flex-1 lg:ml-64 w-full min-w-0 flex flex-col relative overflow-hidden">
+          <main className={`${isMobileListVisible ? 'pt-16 pb-20' : 'pt-0 pb-0'} lg:pt-16 lg:pb-0 flex-1 flex flex-col overflow-hidden`}>
+            <div className="flex-1 flex overflow-hidden">
           {/* Chat list - Desktop always visible, Mobile conditional */}
           <div
             className={`${
@@ -269,7 +269,7 @@ function ChatContent() {
           </main>
         </div>
       </div>
-      <div className={!isMobileListVisible ? "hidden lg:block" : ""}>
+      <div className={`${!isMobileListVisible ? "hidden" : "lg:block"} shrink-0`}>
         <MobileNav />
       </div>
     </div>

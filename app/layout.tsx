@@ -57,7 +57,7 @@ export default function RootLayout({
           <AuthProvider>
             {children}
             {process.env.NODE_ENV === 'production' && <Analytics />}
-            <Toaster position="bottom-right" theme="dark" />
+            <Toaster position="top-center" theme="dark" richColors />
           </AuthProvider>
         </ThemeProvider>
       </body>
