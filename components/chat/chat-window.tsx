@@ -11,7 +11,7 @@ import { toast } from "sonner"
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
 import Link from "next/link"
 import Image from "next/image"
-import { muteChat, reportUser, blockUser, deleteChat, setTypingStatus } from "@/lib/db"
+import { muteChat, reportUser, blockUser, deleteChat, setTypingStatus, createNotification } from "@/lib/db"
 import { useRouter } from "next/navigation"
 import { compressImageToBase64 } from "@/lib/image-utils"
 
@@ -215,6 +215,25 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
         lastMessage: imageUrl ? (messageText ? `[Media] ${messageText}` : 'Sent media') : messageText,
         updatedAt: serverTimestamp()
       })
+
+      // Trigger notification for the other participants
+      if (chatId) {
+        const chatSnap = await getDoc(chatRef)
+        if (chatSnap.exists()) {
+          const participants = chatSnap.data().participants || []
+          for (const p of participants) {
+            if (p !== currentUser.uid) {
+              await createNotification(p, {
+                type: 'message',
+                title: 'New Message from ' + (currentUser.name || 'Student'),
+                message: imageUrl ? 'Sent an attachment' : messageText,
+                link: `/chat?id=${chatId}`,
+                senderId: currentUser.uid
+              }).catch(e => console.error("Failed to notify participant:", e))
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error("Failed to send message", error)
       toast.error("Failed to send message")

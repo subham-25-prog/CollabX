@@ -152,6 +152,26 @@ function ChatContent() {
     getConversations()
   }, [chats, userProfiles, notifications, currentUser, now])
 
+  // Mark notifications as read when chat is selected or on initial load
+  useEffect(() => {
+    if (selectedChat && currentUser && notifications.length > 0) {
+      const chat = conversations.find(c => c.id === selectedChat)
+      const otherUserId = chat?.user?.id
+
+      const unreadNotifs = notifications.filter(
+        n => !n.read && n.type === 'message' && (
+          n.senderId === otherUserId || 
+          n.link?.includes(`id=${selectedChat}`) ||
+          n.link?.includes(selectedChat)
+        )
+      )
+      
+      if (unreadNotifs.length > 0) {
+        unreadNotifs.forEach(n => markNotificationRead(currentUser.uid, n.id))
+      }
+    }
+  }, [selectedChat, currentUser, notifications, conversations])
+
   const handleSelectChat = async (chatId: string) => {
     setSelectedChat(chatId)
     setIsMobileListVisible(false)

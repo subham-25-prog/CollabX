@@ -46,24 +46,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let unsubscribeProfile: (() => void) | null = null
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsLoading(true)
       setUser(firebaseUser)
 
+      // Clean up previous profile listener if it exists
+      if (unsubscribeProfile) {
+        unsubscribeProfile()
+        unsubscribeProfile = null
+      }
+
       if (firebaseUser) {
-        // Fetch or create user profile in Firestore
         const userRef = doc(db, "users", firebaseUser.uid)
         
         try {
-          // Use getDoc first to ensure we fetch from the server. 
-          // onSnapshot can sometimes fire with an empty cache if offline, 
-          // causing the app to overwrite existing profiles.
           const docSnap = await getDoc(userRef)
           
           if (docSnap.exists()) {
             setProfile(docSnap.data() as UserProfile)
           } else {
-            // Create default profile for new user
             const newProfile: UserProfile = {
               uid: firebaseUser.uid,
               email: firebaseUser.email || "",
@@ -86,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Setup real-time listener for profile updates
-        const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
+        unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
             setProfile(docSnap.data() as UserProfile)
           }
@@ -97,10 +100,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           Notification.requestPermission().then((permission) => {
             if (permission === "granted" && messaging) {
               const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
-              if (!vapidKey) {
-                console.warn("FCM VAPID Key is missing in environment variables. Client push notifications token will not be generated.");
-                return;
-              }
+              if (!vapidKey) return;
+              
               getToken(messaging, { vapidKey }).then(async (currentToken) => {
                 if (currentToken) {
                   await updateDoc(userRef, {
@@ -108,23 +109,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   }).catch(e => console.error("Failed to save FCM token:", e));
                 }
               }).catch((err) => {
-                console.error("An error occurred while retrieving FCM token.", err);
+                console.error("FCM Token retrieval error:", err);
               });
             }
           });
         }
-
-        return () => unsubscribeProfile()
       } else {
         setProfile(null)
         setIsLoading(false)
-        // Optionally redirect to auth page if not logged in
-        // router.push("/auth") // Don't enforce globally here, handle per page to avoid infinite loops on /auth
       }
     })
 
-    return () => unsubscribe()
-  }, [router])
+    return () => {
+      unsubscribeAuth()
+      if (unsubscribeProfile) unsubscribeProfile()
+    }
+  }, [router, messaging])
 
   useEffect(() => {
     if (!user) return
