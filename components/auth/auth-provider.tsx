@@ -51,31 +51,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Fetch or create user profile in Firestore
         const userRef = doc(db, "users", firebaseUser.uid)
         
-        const unsubscribeProfile = onSnapshot(userRef, async (docSnap) => {
-          try {
-            if (docSnap.exists()) {
-              setProfile(docSnap.data() as UserProfile)
-            } else {
-              // Create default profile for new user
-              const newProfile: UserProfile = {
-                uid: firebaseUser.uid,
-                email: firebaseUser.email || "",
-                name: firebaseUser.email?.split('@')[0] || "New User",
-                avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${firebaseUser.uid}`,
-                role: "Student",
-                bio: "Hey there! I am using CollabX.",
-                skills: [],
-                availability: "Available",
-                location: "Earth",
-                onboardingCompleted: false,
-              }
-              await setDoc(userRef, newProfile)
-              setProfile(newProfile)
+        try {
+          // Use getDoc first to ensure we fetch from the server. 
+          // onSnapshot can sometimes fire with an empty cache if offline, 
+          // causing the app to overwrite existing profiles.
+          const docSnap = await getDoc(userRef)
+          
+          if (docSnap.exists()) {
+            setProfile(docSnap.data() as UserProfile)
+          } else {
+            // Create default profile for new user
+            const newProfile: UserProfile = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email || "",
+              name: firebaseUser.email?.split('@')[0] || "New User",
+              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${firebaseUser.uid}`,
+              role: "Student",
+              bio: "Hey there! I am using CollabX.",
+              skills: [],
+              availability: "Available",
+              location: "Earth",
+              onboardingCompleted: false,
             }
-          } catch (error) {
-            console.error("Error creating or fetching user profile:", error)
-          } finally {
-            setIsLoading(false)
+            await setDoc(userRef, newProfile)
+            setProfile(newProfile)
+          }
+        } catch (error) {
+          console.error("Error creating or fetching user profile:", error)
+        } finally {
+          setIsLoading(false)
+        }
+
+        // Setup real-time listener for profile updates
+        const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
+          if (docSnap.exists()) {
+            setProfile(docSnap.data() as UserProfile)
           }
         })
 
