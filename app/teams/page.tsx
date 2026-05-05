@@ -290,23 +290,8 @@ export default function TeamsPage() {
             )}
           </AnimatePresence>
 
-          {/* Results count and Main Swipeable Area */}
-          <div className="relative min-h-[500px]">
-            {!isLoading && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="text-sm text-muted-foreground mb-6"
-              >
-                {activeTab === "students" ? (
-                  <span className="flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-primary" /> <strong className="text-foreground">{filteredUsers.length}</strong> Happy Students found</span>
-                ) : (
-                  <span>Showing {filteredProjects.length} results</span>
-                )}
-              </motion.p>
-            )}
-
+          {/* Main Swipeable Area */}
+          <div className="relative min-h-[80vh]">
             <AnimatePresence initial={false} custom={direction}>
               {isLoading ? (
                 <motion.div 
@@ -346,6 +331,14 @@ export default function TeamsPage() {
                   }}
                   className="w-full absolute top-0 left-0"
                 >
+                  <p className="text-sm text-muted-foreground mb-6">
+                    {activeTab === "students" ? (
+                      <span className="flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-primary" /> <strong className="text-foreground">{filteredUsers.length}</strong> Happy Students found</span>
+                    ) : (
+                      <span>Showing {filteredProjects.length} results</span>
+                    )}
+                  </p>
+
                   {activeTab === "students" ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1 pb-32">
                       {filteredUsers.slice(0, displayLimit).map((user, index) => (
