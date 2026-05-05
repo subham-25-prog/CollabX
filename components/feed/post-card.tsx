@@ -190,7 +190,7 @@ export function PostCard({ post }: PostCardProps) {
                 <img
                   src={img}
                   alt={`Post image ${i+1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             ))}
@@ -237,7 +237,7 @@ export function PostCard({ post }: PostCardProps) {
               <img
                 src={post.image}
                 alt="Post media"
-                className="w-full max-h-[587px] object-cover"
+                className="w-full max-h-[587px] object-contain"
               />
             )}
           </motion.div>
