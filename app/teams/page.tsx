@@ -151,12 +151,9 @@ export default function TeamsPage() {
             transition={{ duration: 0.4 }}
             className="text-center mb-4 sm:mb-8"
           >
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1.5 sm:mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
               Find Your <span className="gradient-text">Dream Team</span>
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto">
-              Connect with talented students who share your passion. Build something amazing together.
-            </p>
           </motion.div>
 
           {/* Tabs and Create Button */}
