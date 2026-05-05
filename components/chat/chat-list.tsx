@@ -71,7 +71,9 @@ export function ChatList({ conversations, selectedId, onSelect }: ChatListProps)
               className={`w-full flex items-center gap-3 p-4 border-b border-border/50 transition-all duration-200 text-left ${
                 isSelected
                   ? "bg-primary/10 border-l-2 border-l-primary"
-                  : "hover:bg-secondary/30"
+                  : conversation.unread > 0 
+                    ? "bg-green-500/5 hover:bg-green-500/10" 
+                    : "hover:bg-secondary/30"
               }`}
             >
               <div className="relative flex-shrink-0">
@@ -100,11 +102,13 @@ export function ChatList({ conversations, selectedId, onSelect }: ChatListProps)
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground truncate pr-2">
+                  <p className={`text-sm truncate pr-2 ${conversation.unread > 0 ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
                     {conversation.lastMessage}
                   </p>
                   {conversation.unread > 0 && (
-                    <span className="flex-shrink-0 w-3 h-3 rounded-full bg-green-500" />
+                    <span className="flex-shrink-0 flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-green-500 text-white text-[10px] font-bold">
+                      {conversation.unread > 99 ? '99+' : conversation.unread}
+                    </span>
                   )}
                 </div>
               </div>

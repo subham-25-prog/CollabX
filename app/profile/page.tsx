@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { motion } from "framer-motion"
+import Link from "next/link"
 import { Navbar } from "@/components/layout/navbar"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { Sidebar } from "@/components/layout/sidebar"
@@ -10,7 +11,7 @@ import { ProfileTabs } from "@/components/profile/profile-tabs"
 import { PostCard } from "@/components/feed/post-card"
 import { useAuth } from "@/components/auth/auth-provider"
 import { db } from "@/lib/firebase"
-import { doc, getDoc, collection, query, where, getDocs, orderBy } from "firebase/firestore"
+import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from "firebase/firestore"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 

@@ -3,7 +3,9 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from "firebase/firestore"
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, arrayUnion } from "firebase/firestore"
+import { messaging } from "@/lib/firebase"
+import { getToken } from "firebase/messaging"
 import { useRouter } from "next/navigation"
 
 interface UserProfile {
@@ -89,6 +91,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setProfile(docSnap.data() as UserProfile)
           }
         })
+
+        // Request FCM Push Notification Permissions
+        if (typeof window !== "undefined" && "Notification" in window) {
+          Notification.requestPermission().then((permission) => {
+            if (permission === "granted" && messaging) {
+              const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+              if (!vapidKey) {
+                console.warn("FCM VAPID Key is missing in environment variables. Client push notifications token will not be generated.");
+                return;
+              }
+              getToken(messaging, { vapidKey }).then(async (currentToken) => {
+                if (currentToken) {
+                  await updateDoc(userRef, {
+                    fcmTokens: arrayUnion(currentToken)
+                  }).catch(e => console.error("Failed to save FCM token:", e));
+                }
+              }).catch((err) => {
+                console.error("An error occurred while retrieving FCM token.", err);
+              });
+            }
+          });
+        }
 
         return () => unsubscribeProfile()
       } else {

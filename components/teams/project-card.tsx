@@ -103,9 +103,11 @@ export function ProjectCard({ project, allUsers = [] }: ProjectCardProps) {
   return (
     <motion.div
       layout
-      className="glass rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 border border-border/50"
+      className={`glass rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 border ${
+        isOwner || isMember ? "border-primary/60 shadow-[0_0_15px_rgba(99,102,241,0.2)] bg-primary/5" : "border-border/50"
+      }`}
     >
-      <div className="p-5 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
+      <div className="p-4 sm:p-5 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="flex justify-between items-start mb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -137,7 +139,7 @@ export function ProjectCard({ project, allUsers = [] }: ProjectCardProps) {
           {project.description}
         </p>
 
-        {(project.membersNeeded || project.duration || project.phase || project.commitment) && (
+        {isExpanded && (project.membersNeeded || project.duration || project.phase || project.commitment) && (
           <div className="grid grid-cols-2 gap-2 mb-4">
             {project.membersNeeded && (
               <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border">
@@ -191,7 +193,7 @@ export function ProjectCard({ project, allUsers = [] }: ProjectCardProps) {
           )}
         </div>
 
-        {project.imageUrl && (
+        {project.imageUrl && isExpanded && (
           <div className="mb-4 rounded-xl overflow-hidden bg-secondary relative h-48 w-full">
             <Image src={project.imageUrl} alt={project.title} fill unoptimized className="object-cover" />
           </div>

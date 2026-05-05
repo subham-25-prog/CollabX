@@ -389,11 +389,35 @@ export async function createNotification(userId: string, data: {
   senderId?: string
 }) {
   const notificationsRef = collection(db, "users", userId, "notifications")
-  return await addDoc(notificationsRef, {
+  const res = await addDoc(notificationsRef, {
     ...data,
     read: false,
     timestamp: serverTimestamp()
   })
+
+  // Trigger Push Notification
+  try {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      if (userData.fcmTokens && Array.isArray(userData.fcmTokens) && userData.fcmTokens.length > 0) {
+        fetch("/api/notifications/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: data.title,
+            body: data.message,
+            tokens: userData.fcmTokens,
+            data: { link: data.link || "/" }
+          })
+        }).catch(err => console.error("Failed to trigger push notification API", err));
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching user for push notification:", error);
+  }
+
+  return res;
 }
 
 export async function markNotificationRead(userId: string, notificationId: string) {

@@ -98,7 +98,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-            className="text-6xl sm:text-7xl md:text-8xl font-black text-foreground mb-8 leading-[1.1] tracking-tight"
+            className="text-5xl sm:text-7xl md:text-8xl font-black text-foreground mb-6 sm:mb-8 leading-[1.1] tracking-tight"
           >
             Build Your
             <br />
@@ -111,7 +111,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 font-medium leading-relaxed"
+            className="text-base sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 sm:mb-12 font-medium leading-relaxed"
           >
             Find like-minded people, collaborate on groundbreaking projects, and achieve more together. The ultimate network for innovators.
           </motion.p>
@@ -144,8 +144,8 @@ export default function LandingPage() {
       {/* Features Section */}
       <section className="py-32 px-4 sm:px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl font-black text-foreground mb-6 tracking-tight">
+          <div className="text-center mb-12 sm:mb-20">
+            <h2 className="text-3xl sm:text-5xl font-black text-foreground mb-4 sm:mb-6 tracking-tight">
               Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400">Scale.</span>
             </h2>
           </div>
@@ -177,7 +177,7 @@ export default function LandingPage() {
               <motion.div
                 key={i}
                 whileHover={{ y: -10, scale: 1.02 }}
-                className={`group relative rounded-3xl p-8 bg-white/5 border border-white/10 backdrop-blur-xl overflow-hidden transition-all duration-500 hover:shadow-2xl ${feature.shadow}`}
+                className={`group relative rounded-3xl p-6 sm:p-8 bg-white/5 border border-white/10 backdrop-blur-xl overflow-hidden transition-all duration-500 hover:shadow-2xl ${feature.shadow}`}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
                 <div className="relative z-10">
@@ -203,7 +203,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             
             {/* Left side: UI Mockups */}
-            <div className="relative h-[600px] w-full perspective-1000">
+            <div className="relative h-[450px] sm:h-[600px] w-full perspective-1000 scale-75 origin-top sm:scale-100 sm:origin-center">
               
               {/* Feed Card */}
               <motion.div 

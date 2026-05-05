@@ -32,6 +32,37 @@ export default function TeamsPage() {
   const [selectedAvailability, setSelectedAvailability] = useState<string | null>(null)
   const [displayLimit, setDisplayLimit] = useState(20)
 
+  // Swipe gesture state
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    const tabs = ["projects", "my_projects", "startups", "students"] as const
+    const currentIndex = tabs.indexOf(activeTab)
+
+    if (isLeftSwipe && currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1])
+    }
+    if (isRightSwipe && currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1])
+    }
+  }
+
   // Reset display limit when tab changes
   useEffect(() => {
     setDisplayLimit(20)
@@ -112,7 +143,12 @@ export default function TeamsPage() {
       
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 w-full min-w-0">
+        <main 
+          className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 w-full min-w-0"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <div className="max-w-6xl mx-auto px-4 py-3 sm:py-6">
           {/* Header */}
           <motion.div
