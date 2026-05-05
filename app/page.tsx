@@ -6,7 +6,7 @@ import {
   ArrowRight, Search, Trophy, Users, MessageSquare, 
   Heart, MessageCircle, Share2, Plus, Code,
   Sparkles, Globe, Shield, Terminal, Rocket, ChevronRight,
-  UserPlus
+  UserPlus, Mail, Phone
 } from "lucide-react"
 import { LogoIcon } from "@/components/ui/logo"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -356,6 +356,42 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
+      {/* Contact Section */}
+      <section id="contact" className="py-32 px-4 sm:px-6 relative z-10 bg-white/[0.01]">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl sm:text-5xl font-black text-foreground mb-8 tracking-tight">
+            Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Touch.</span>
+          </h2>
+          <p className="text-xl text-muted-foreground mb-12">
+            Have questions or want to partner with us? Reach out directly.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="glass p-8 rounded-3xl border border-white/10 flex flex-col items-center gap-4 group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Mail className="w-6 h-6 text-indigo-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Email Us</h3>
+              <p className="text-indigo-400 font-medium">shubhamoy27@gmail.com</p>
+            </motion.div>
+            
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="glass p-8 rounded-3xl border border-white/10 flex flex-col items-center gap-4 group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Phone className="w-6 h-6 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Call Us</h3>
+              <p className="text-purple-400 font-medium">+91 91444 57475</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-16 px-4 sm:px-6 border-t border-border bg-background/90 relative z-10">
         <div className="max-w-7xl mx-auto">
@@ -386,14 +422,14 @@ export default function LandingPage() {
               <ul className="space-y-3 text-slate-400 text-sm">
                 <li><Link href="#" className="hover:text-indigo-400 transition-colors">Privacy Policy</Link></li>
                 <li><Link href="#" className="hover:text-indigo-400 transition-colors">Terms of Service</Link></li>
-                <li><Link href="#" className="hover:text-indigo-400 transition-colors">Contact Us</Link></li>
+                <li><Link href="#contact" className="hover:text-indigo-400 transition-colors">Contact Us</Link></li>
               </ul>
             </div>
           </div>
           
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-slate-500 text-sm">
-              © {new Date().getFullYear()} CollabX. All rights reserved.
+              © {new Date().getFullYear()} CollabX. Built with ❤️ by Shubhamoy Karmakar.
             </p>
             <div className="flex items-center gap-4 text-slate-500">
               {/* Social icons placeholders */}

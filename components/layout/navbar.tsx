@@ -229,8 +229,7 @@ export function Navbar({ onCreatePost }: NavbarProps) {
               </button>
             )}
 
-            {/* Install PWA Button */}
-            <InstallPWAButton className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium text-sm border border-primary/20" />
+
 
             {/* Admin Icon for Mobile */}
             {profile?.role === 'Admin' && (
