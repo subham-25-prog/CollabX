@@ -270,7 +270,7 @@ function FeedContent() {
                 <p className="text-muted-foreground">No posts yet. Be the first to share something!</p>
               </div>
             ) : (
-              <div className="space-y-6 max-w-[470px] mx-auto w-full">
+              <div className="space-y-6 max-w-[540px] mx-auto w-full">
                 {posts.map((post, index) => {
                   if (posts.length === index + 1) {
                     return (
