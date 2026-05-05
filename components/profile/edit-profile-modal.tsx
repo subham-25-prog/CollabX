@@ -55,9 +55,9 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
   const handleAddSkill = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault()
-      const newSkill = currentSkill.trim()
-      if (newSkill && !skills.includes(newSkill)) {
-        setSkills([...skills, newSkill])
+      const newSkills = currentSkill.split(',').map(s => s.trim()).filter(s => s && !skills.includes(s))
+      if (newSkills.length > 0) {
+        setSkills([...skills, ...newSkills])
       }
       setCurrentSkill("")
     } else if (e.key === 'Backspace' && currentSkill === "" && skills.length > 0) {
@@ -270,7 +270,18 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
                 <input
                   type="text"
                   value={currentSkill}
-                  onChange={(e) => setCurrentSkill(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    if (val.includes(',')) {
+                      const newSkills = val.split(',').map(s => s.trim()).filter(s => s && !skills.includes(s))
+                      if (newSkills.length > 0) {
+                        setSkills([...skills, ...newSkills])
+                      }
+                      setCurrentSkill("")
+                    } else {
+                      setCurrentSkill(val)
+                    }
+                  }}
                   onKeyDown={handleAddSkill}
                   placeholder={skills.length === 0 ? "Type a skill and press Enter..." : ""}
                   className="flex-1 min-w-[120px] bg-transparent outline-none text-foreground text-sm py-1 px-2"

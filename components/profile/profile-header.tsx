@@ -83,7 +83,7 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
   return (
     <div className="relative">
       {/* Cover Image */}
-      <div className="h-32 sm:h-64 relative overflow-hidden bg-secondary group">
+      <div className="h-24 sm:h-64 relative overflow-hidden bg-secondary group">
         <Image
           src={getCoverImage()}
           alt="Cover"
@@ -94,7 +94,7 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
       </div>
 
       <div className="max-w-4xl mx-auto px-4">
-        <div className="relative -mt-16 sm:-mt-24 flex justify-between items-end flex-wrap gap-4">
+        <div className="relative -mt-12 sm:-mt-24 flex items-center justify-between gap-4">
           {/* Profile Image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -108,25 +108,24 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
               width={160}
               height={160}
               unoptimized
-              className="w-28 h-28 sm:w-40 sm:h-40 rounded-2xl object-cover border-4 border-background shadow-xl bg-background"
+              className="w-24 h-24 sm:w-40 sm:h-40 rounded-full sm:rounded-2xl object-cover border-4 border-background shadow-xl bg-background"
             />
-            <span className="absolute bottom-2 right-2 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-4 border-background" />
+            <span className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-4 border-background" />
           </motion.div>
 
-          <div className="flex items-center gap-2 mb-2 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-4 ml-auto pt-12 sm:pt-24">
             {isOwnProfile && (
               <>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium transition-colors text-sm sm:text-base"
+                  className="flex items-center justify-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-semibold transition-colors text-sm sm:text-base border border-border"
                   onClick={() => setShowEditModal(true)}
                 >
-                  <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
                   Edit Profile
                 </motion.button>
-                <Link href="/settings" className="lg:hidden p-2 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors shadow-sm">
-                  <Settings className="w-5 h-5" />
+                <Link href="/settings" className="p-1.5 sm:p-2 rounded-xl bg-transparent hover:bg-secondary text-foreground transition-colors">
+                  <Settings className="w-6 h-6 sm:w-6 sm:h-6" />
                 </Link>
               </>
             )}

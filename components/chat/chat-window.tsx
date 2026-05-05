@@ -87,7 +87,21 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+    
+    // Mark incoming messages as read
+    if (!chatId || !currentUser || messages.length === 0) return
+    const unreadMessages = messages.filter(m => m.sender !== "me" && !m.read)
+    if (unreadMessages.length > 0) {
+      unreadMessages.forEach(async (m) => {
+        try {
+          const msgRef = doc(db, "chats", chatId, "messages", m.id)
+          await updateDoc(msgRef, { read: true })
+        } catch (error) {
+          console.error("Failed to mark read:", error)
+        }
+      })
+    }
+  }, [messages, chatId, currentUser])
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
@@ -124,8 +138,18 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
       let imageUrl = null
       if (currentAttachment) {
         if (currentAttachment.type.startsWith('image/')) {
+          const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: false
+          }
+          const compressedFile = await compressImageToBase64(currentAttachment, 1920)
+          
+          // ImgBB API supports base64 directly (without data:image/jpeg;base64,)
+          const base64Data = compressedFile.split(',')[1]
           const formData = new FormData()
-          formData.append("image", currentAttachment)
+          formData.append("image", base64Data)
+          
           const response = await fetch("https://api.imgbb.com/1/upload?key=6e38ec9c63ca880872d00fe6e4be0417", {
             method: "POST",
             body: formData
@@ -138,6 +162,7 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
           }
         } else {
           toast.error("Video uploads are not supported on the free plan.")
+          setSendingMessages(prev => prev.filter(m => m.id !== tempId))
           return
         }
       }
@@ -320,9 +345,9 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
               className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}
             >
               {message.sender !== "me" && conversation.user.isGroup && message.senderAvatar && (
-                <div className="mr-2 flex flex-col items-center flex-shrink-0 mt-1">
+                <Link href={`/profile?id=${message.senderId}`} className="mr-2 flex flex-col items-center flex-shrink-0 mt-1 hover:opacity-80 transition-opacity">
                   <Image width={32} height={32} unoptimized src={message.senderAvatar} alt={message.senderName} className="w-8 h-8 rounded-full object-cover" title={message.senderName} />
-                </div>
+                </Link>
               )}
               <div
                 className={`relative max-w-[85%] sm:max-w-[75%] px-4 py-3 shadow-sm text-[15px] break-words overflow-hidden ${
@@ -361,7 +386,9 @@ export function ChatWindow({ conversation, chatId }: ChatWindowProps) {
                   <span>{message.timestampFormatted}</span>
                   {message.sender === "me" && (
                     message.isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 
-                    <CheckCheck className={`w-3.5 h-3.5 ${message.read ? 'text-blue-500' : 'text-muted-foreground'}`} />
+                    message.read ? <CheckCheck className="w-3.5 h-3.5 text-blue-500" /> :
+                    conversation.user.online ? <CheckCheck className="w-3.5 h-3.5 text-muted-foreground" /> :
+                    <Check className="w-3.5 h-3.5 text-muted-foreground" />
                   )}
                 </div>
               </div>

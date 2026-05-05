@@ -38,20 +38,11 @@ interface PostCardProps {
 export function PostCard({ post }: PostCardProps) {
   const { profile } = useAuth()
   
-  const isCurrentlyLiked = profile ? post.likes.includes(profile.uid) : false
-  const [isLiked, setIsLiked] = useState(isCurrentlyLiked)
-  const [likesCount, setLikesCount] = useState(post.likes.length)
+  const isLiked = profile ? post.likes.includes(profile.uid) : false
+  const likesCount = post.likes.length
   const [isSaved, setIsSaved] = useState(false)
   const [showComments, setShowComments] = useState(false)
-
-  // Sync state with props for real-time updates when other users like
-  // Sync state with props for real-time updates when other users like
-  React.useEffect(() => {
-    if (profile) {
-      setIsLiked(post.likes.includes(profile.uid))
-    }
-    setLikesCount(post.likes.length)
-  }, [post.likes, profile])
+  const [isLiking, setIsLiking] = useState(false)
 
   // Format timestamp safely
   const timeAgo = post.timestamp?.toDate ? formatTimeAgo(post.timestamp.toDate()) : "Just now"
@@ -69,19 +60,15 @@ export function PostCard({ post }: PostCardProps) {
   }
 
   const handleLike = async () => {
-    if (!profile) return
+    if (!profile || isLiking) return
     
-    // Optimistic UI update
-    const newIsLiked = !isLiked
-    setIsLiked(newIsLiked)
-    setLikesCount(prev => newIsLiked ? prev + 1 : prev - 1)
-    
+    setIsLiking(true)
     try {
-      await toggleLikePost(post.id, profile.uid, !newIsLiked, profile.name || "Someone") // pass the OLD state to toggle
+      await toggleLikePost(post.id, profile.uid, isLiked, profile.name || "Someone") 
     } catch (error) {
-      // Revert on failure
-      setIsLiked(!newIsLiked)
-      setLikesCount(prev => !newIsLiked ? prev + 1 : prev - 1)
+      toast.error("Failed to like post")
+    } finally {
+      setIsLiking(false)
     }
   }
 
@@ -313,7 +300,7 @@ export function PostCard({ post }: PostCardProps) {
                 toast.success("Link copied to clipboard!")
               }
             }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200"
+            className="flex items-center gap-2 px-2.5 sm:px-4 py-2.5 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200"
           >
             <Share2 className="w-5 h-5" />
             <span className="text-sm font-medium hidden sm:inline">Share</span>

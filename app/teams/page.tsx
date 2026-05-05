@@ -136,7 +136,7 @@ export default function TeamsPage() {
             transition={{ duration: 0.4, delay: 0.05 }}
             className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8"
           >
-            <div className="flex p-1 rounded-xl bg-secondary/50 backdrop-blur-md overflow-x-auto custom-scrollbar">
+            <div className="flex flex-wrap p-1 rounded-xl bg-secondary/50 backdrop-blur-md gap-1">
               <button
                 onClick={() => setActiveTab("projects")}
                 className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
@@ -205,7 +205,7 @@ export default function TeamsPage() {
                 placeholder="Search by name, role, or skills..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 rounded-xl glass border border-transparent focus:border-primary/30 transition-all duration-200 outline-none placeholder:text-muted-foreground"
+                className="w-full pl-12 pr-4 py-3.5 rounded-xl glass border border-transparent focus:border-primary/30 transition-all duration-200 outline-none text-base placeholder:text-muted-foreground"
               />
             </div>
             <motion.button

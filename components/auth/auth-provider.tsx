@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
     updatePresence()
-    const interval = setInterval(updatePresence, 5 * 60 * 1000)
+    const interval = setInterval(updatePresence, 1 * 60 * 1000)
     return () => clearInterval(interval)
   }, [user])
 

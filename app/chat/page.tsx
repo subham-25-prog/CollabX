@@ -70,7 +70,7 @@ function ChatContent() {
               if (userDoc.exists()) {
                 const userData = userDoc.data()
                 const lastActive = userData.lastActive?.toDate()
-                const isOnline = lastActive ? (new Date().getTime() - lastActive.getTime()) < 10 * 60 * 1000 : false
+                const isOnline = lastActive ? (new Date().getTime() - lastActive.getTime()) < 2 * 60 * 1000 : false
                 
                 otherUser = {
                   id: otherUserId,
