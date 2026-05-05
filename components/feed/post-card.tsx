@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Link as LinkIcon, Flag, Trash2, X } from "lucide-react"
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Link as LinkIcon, Flag, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { toggleLikePost, voteOnPoll, deletePost } from "@/lib/db"
 import { toast } from "sonner"
@@ -44,9 +44,31 @@ export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   // Format timestamp safely
   const timeAgo = post.timestamp?.toDate ? formatTimeAgo(post.timestamp.toDate()) : "Just now"
+
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
+
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const index = Math.round(scrollContainerRef.current.scrollLeft / scrollContainerRef.current.clientWidth)
+      setCurrentImageIndex(index)
+    }
+  }
+
+  const scrollPrev = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -scrollContainerRef.current.clientWidth, behavior: 'smooth' })
+    }
+  }
+
+  const scrollNext = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: scrollContainerRef.current.clientWidth, behavior: 'smooth' })
+    }
+  }
 
   const userVote = post.poll && profile ? post.poll.votedUsers?.[profile.uid] : null
   const totalVotes = post.poll ? post.poll.options.reduce((sum, opt) => sum + opt.votes, 0) : 0
@@ -152,8 +174,13 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Images/Media */}
       {post.images && post.images.length > 0 ? (
-        <div className="px-0 sm:px-0">
-          <div className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-0">
+        <div className="px-0 sm:px-0 relative group">
+          <div 
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-0"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {post.images.map((img, i) => (
               <div 
                 key={i} 
@@ -166,14 +193,34 @@ export function PostCard({ post }: PostCardProps) {
                   fill
                   className="object-cover"
                 />
-                {post.images!.length > 1 && (
-                  <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-md z-10 font-medium">
-                    {i + 1} / {post.images!.length}
-                  </div>
-                )}
               </div>
             ))}
           </div>
+
+          {/* Navigation Buttons & Indicators */}
+          {post.images.length > 1 && (
+            <>
+              {currentImageIndex > 0 && (
+                <button 
+                  onClick={(e) => { e.stopPropagation(); scrollPrev(); }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 z-10"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+              )}
+              {currentImageIndex < post.images.length - 1 && (
+                <button 
+                  onClick={(e) => { e.stopPropagation(); scrollNext(); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 z-10"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
+              <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-md z-10 font-medium shadow-sm">
+                {currentImageIndex + 1} / {post.images.length}
+              </div>
+            </>
+          )}
         </div>
       ) : post.image ? (
         <div className="px-0 sm:px-0">
