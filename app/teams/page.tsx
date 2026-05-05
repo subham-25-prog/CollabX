@@ -290,24 +290,24 @@ export default function TeamsPage() {
             )}
           </AnimatePresence>
 
-          {/* Results count */}
-          {!isLoading && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="text-sm text-muted-foreground mb-6"
-            >
-              {activeTab === "students" ? (
-                <span className="flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-primary" /> <strong className="text-foreground">{filteredUsers.length}</strong> Happy Students found</span>
-              ) : (
-                <span>Showing {filteredProjects.length} results</span>
-              )}
-            </motion.p>
-          )}
+          {/* Results count and Main Swipeable Area */}
+          <div className="relative min-h-[500px]">
+            {!isLoading && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="text-sm text-muted-foreground mb-6"
+              >
+                {activeTab === "students" ? (
+                  <span className="flex items-center gap-1.5"><Sparkles className="w-4 h-4 text-primary" /> <strong className="text-foreground">{filteredUsers.length}</strong> Happy Students found</span>
+                ) : (
+                  <span>Showing {filteredProjects.length} results</span>
+                )}
+              </motion.p>
+            )}
 
-          <div className="overflow-hidden relative min-h-[400px]">
-            <AnimatePresence initial={false} custom={direction} mode="wait">
+            <AnimatePresence initial={false} custom={direction}>
               {isLoading ? (
                 <motion.div 
                   key="loading"
@@ -327,8 +327,8 @@ export default function TeamsPage() {
                   animate="center"
                   exit="exit"
                   transition={{
-                    x: { type: "spring", stiffness: 300, damping: 30 },
-                    opacity: { duration: 0.2 }
+                    x: { type: "spring", stiffness: 400, damping: 35 },
+                    opacity: { duration: 0.1 }
                   }}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
@@ -344,10 +344,10 @@ export default function TeamsPage() {
                       }
                     }
                   }}
-                  className="w-full"
+                  className="w-full absolute top-0 left-0"
                 >
                   {activeTab === "students" ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1 pb-32">
                       {filteredUsers.slice(0, displayLimit).map((user, index) => (
                         <motion.div
                           key={user.id}
@@ -360,7 +360,7 @@ export default function TeamsPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1 pb-32">
                       {filteredProjects.slice(0, displayLimit).map((project, index) => (
                         <motion.div
                           key={project.id}
@@ -371,6 +371,19 @@ export default function TeamsPage() {
                           <ProjectCard project={project} allUsers={users} />
                         </motion.div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Load More Button */}
+                  {((activeTab === "students" && filteredUsers.length > displayLimit) || 
+                    (activeTab !== "students" && filteredProjects.length > displayLimit)) && (
+                    <div className="flex justify-center mt-8">
+                      <button
+                        onClick={() => setDisplayLimit(prev => prev + 20)}
+                        className="px-6 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium transition-colors"
+                      >
+                        Load More
+                      </button>
                     </div>
                   )}
 
