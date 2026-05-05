@@ -63,7 +63,7 @@ export function Sidebar() {
           {[
             { icon: Home, label: "Home Feed", href: "/feed" },
             { icon: Users, label: "Find Team", href: "/teams" },
-            { icon: MessageCircle, label: "Messages", href: "/chat", badge: unreadCount > 0 ? unreadCount : undefined },
+            { icon: MessageCircle, label: "Messages", href: "/chat", badge: notifications.filter(n => !n.read && n.type === 'message').length > 0 ? true : undefined },
             { icon: User, label: "Profile", href: "/profile" },
             ...(profile?.role === 'Admin' ? [{ icon: ShieldCheck, label: "Admin", href: "/admin/notifications" }] : [])
           ].map((item) => {
