@@ -33,56 +33,48 @@ function ProfileContent() {
   }, [currentUser, authLoading, router])
 
   useEffect(() => {
-    async function fetchProfileData() {
-      if (authLoading) return
-      
-      try {
-        let targetUserId = profileId
-        let profileData = null
-        
-        // If no ID is provided, use the current user's profile
-        if (!targetUserId && currentUser) {
-          targetUserId = currentUser.uid
-          profileData = currentUser
-        } else if (targetUserId) {
-          // Fetch from Firestore
-          const docRef = doc(db, "users", targetUserId)
-          const docSnap = await getDoc(docRef)
-          if (docSnap.exists()) {
-            profileData = { uid: docSnap.id, ...docSnap.data() }
-          }
-        }
+    if (authLoading || !profileId && !currentUser) return
 
-        setProfile(profileData)
+    let targetUserId = profileId || currentUser?.uid
+    if (!targetUserId) return
 
-        // Fetch posts for this user
-        if (targetUserId) {
-          const postsQuery = query(
-            collection(db, "posts"),
-            where("author.id", "==", targetUserId),
-            orderBy("timestamp", "desc")
-          )
-          const postsSnapshot = await getDocs(postsQuery)
-          setUserPosts(postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    setIsLoading(true)
 
-          // Fetch teams/collaborations from projects collection
-          const teamsQuery = query(
-            collection(db, "projects"),
-            where("members", "array-contains", targetUserId),
-            orderBy("createdAt", "desc")
-          )
-          const teamsSnapshot = await getDocs(teamsQuery)
-          const teamsData = teamsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-          setUserTeams(teamsData)
-        }
-      } catch (error) {
-        console.error("Error fetching profile:", error)
-      } finally {
-        setIsLoading(false)
+    // 1. Fetch/Listen to Profile Data
+    const unsubProfile = onSnapshot(doc(db, "users", targetUserId), (docSnap) => {
+      if (docSnap.exists()) {
+        setProfile({ uid: docSnap.id, ...docSnap.data() })
+      } else if (!profileId && currentUser) {
+        setProfile(currentUser)
       }
-    }
+      setIsLoading(false)
+    })
 
-    fetchProfileData()
+    // 2. Listen to Posts
+    const postsQuery = query(
+      collection(db, "posts"),
+      where("author.id", "==", targetUserId),
+      orderBy("timestamp", "desc")
+    )
+    const unsubPosts = onSnapshot(postsQuery, (snapshot) => {
+      setUserPosts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    })
+
+    // 3. Listen to Teams
+    const teamsQuery = query(
+      collection(db, "projects"),
+      where("members", "array-contains", targetUserId),
+      orderBy("createdAt", "desc")
+    )
+    const unsubTeams = onSnapshot(teamsQuery, (snapshot) => {
+      setUserTeams(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    })
+
+    return () => {
+      unsubProfile()
+      unsubPosts()
+      unsubTeams()
+    }
   }, [profileId, currentUser, authLoading])
 
   if (isLoading || authLoading) {
