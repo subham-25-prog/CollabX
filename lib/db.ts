@@ -63,6 +63,13 @@ export async function voteOnPoll(postId: string, userId: string, optionId: strin
   })
 }
 
+export async function togglePinPost(postId: string, isPinned: boolean) {
+  const postRef = doc(db, "posts", postId)
+  return await updateDoc(postRef, {
+    isPinned: isPinned
+  })
+}
+
 export async function toggleLikePost(postId: string, userId: string, isLiked: boolean, userName: string) {
   const postRef = doc(db, "posts", postId)
   if (isLiked) {

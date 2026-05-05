@@ -33,6 +33,7 @@ function FeedContent() {
   const [showCreatePost, setShowCreatePost] = useState(false)
   const [posts, setPosts] = useState<any[]>([])
   const [newPosts, setNewPosts] = useState<any[]>([])
+  const [pinnedPosts, setPinnedPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
   const [lastVisible, setLastVisible] = useState<any>(null)
@@ -47,6 +48,25 @@ function FeedContent() {
       router.replace("/onboarding")
     }
   }, [profile, isAuthLoading, router])
+
+  // Listen for pinned posts globally
+  useEffect(() => {
+    const q = query(
+      collection(db, "posts"),
+      where("isPinned", "==", true)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const pinned = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort pinned posts by timestamp desc
+      pinned.sort((a, b) => {
+        const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(0);
+        const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(0);
+        return dateB.getTime() - dateA.getTime();
+      });
+      setPinnedPosts(pinned);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Instagram-style Algorithm: Calculate Relevance Score
   const calculateRelevanceScore = React.useCallback((post: any, userProfile: any) => {
@@ -196,6 +216,7 @@ function FeedContent() {
   const handleDeletePost = (postId: string) => {
     setPosts(prev => prev.filter(p => p.id !== postId));
     setNewPosts(prev => prev.filter(p => p.id !== postId));
+    setPinnedPosts(prev => prev.filter(p => p.id !== postId));
   };
 
   return (
@@ -270,14 +291,28 @@ function FeedContent() {
               <div className="flex justify-center items-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
-            ) : posts.length === 0 ? (
+            ) : posts.length === 0 && pinnedPosts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">No posts yet. Be the first to share something!</p>
               </div>
             ) : (
               <div className="space-y-6 max-w-[540px] mx-auto w-full">
-                {posts.map((post, index) => {
-                  if (posts.length === index + 1) {
+                {/* Render Pinned Posts First */}
+                {pinnedPosts.map((post, index) => (
+                  <motion.div
+                    key={`pinned-${post.id}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <PostCard post={post as any} onDelete={handleDeletePost} />
+                  </motion.div>
+                ))}
+
+                {/* Render Normal Posts (Exclude Pinned) */}
+                {posts.filter(p => !pinnedPosts.some(pinned => pinned.id === p.id)).map((post, index) => {
+                  const filteredPosts = posts.filter(p => !pinnedPosts.some(pinned => pinned.id === p.id));
+                  if (filteredPosts.length === index + 1) {
                     return (
                       <motion.div
                         ref={lastPostElementRef}

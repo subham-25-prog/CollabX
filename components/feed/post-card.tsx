@@ -6,7 +6,7 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Link as LinkIcon, Flag, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
-import { toggleLikePost, voteOnPoll, deletePost } from "@/lib/db"
+import { toggleLikePost, voteOnPoll, deletePost, togglePinPost } from "@/lib/db"
 import { toast } from "sonner"
 import { PostCommentsModal } from "./post-comments-modal"
 import { AnimatePresence } from "framer-motion"
@@ -32,6 +32,7 @@ interface PostCardProps {
       options: { id: string, text: string, votes: number }[]
       votedUsers: { [userId: string]: string }
     }
+    isPinned?: boolean
   }
   onDelete?: (postId: string) => void
 }
@@ -136,10 +137,17 @@ export function PostCard({ post, onDelete }: PostCardProps) {
               className="w-9 h-9 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary/30 transition-all bg-secondary"
             />
           </motion.div>
-          <div>
-            <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
-              {post.author.name}
-            </h3>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
+                {post.author.name}
+              </h3>
+              {post.isPinned && (
+                <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm">
+                  📌 Pinned
+                </span>
+              )}
+            </div>
             {post.author.role && <p className="text-xs text-muted-foreground">{post.author.role}</p>}
           </div>
         </Link>
@@ -161,6 +169,21 @@ export function PostCard({ post, onDelete }: PostCardProps) {
                 >
                   <LinkIcon className="w-4 h-4" /> Copy Link
                 </DropdownMenu.Item>
+                {profile?.role === 'Admin' && (
+                  <DropdownMenu.Item 
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-default hover:bg-secondary/80 focus:bg-secondary/80 text-foreground"
+                    onClick={async () => {
+                      try {
+                        await togglePinPost(post.id, !post.isPinned)
+                        toast.success(`Post ${post.isPinned ? 'unpinned' : 'pinned'} successfully`)
+                      } catch (error) {
+                        toast.error(`Failed to ${post.isPinned ? 'unpin' : 'pin'} post`)
+                      }
+                    }}
+                  >
+                    <Bookmark className="w-4 h-4" /> {post.isPinned ? "Unpin Post" : "Pin Post"}
+                  </DropdownMenu.Item>
+                )}
                 <DropdownMenu.Separator className="h-px bg-border my-1" />
                 {profile?.uid === post.author.id || profile?.role === 'Admin' ? (
                   <DropdownMenu.Item 
