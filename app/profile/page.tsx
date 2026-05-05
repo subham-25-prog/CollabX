@@ -40,6 +40,9 @@ function ProfileContent() {
     if (!targetUserId) return
 
     setIsLoading(true)
+    setProfile(null)
+    setUserPosts([])
+    setUserTeams([])
 
     // 1. Fetch/Listen to Profile Data
     const unsubProfile = onSnapshot(doc(db, "users", targetUserId), (docSnap) => {
