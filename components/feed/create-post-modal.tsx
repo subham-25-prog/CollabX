@@ -6,7 +6,7 @@ import { X, Image, Smile, MapPin, Users, Loader2, Sparkles, BarChart2, Plus, Tra
 import { useAuth } from "@/components/auth/auth-provider"
 import { createPost } from "@/lib/db"
 import { toast } from "sonner"
-import imageCompression from "browser-image-compression"
+import { compressImageToBase64 } from "@/lib/image-utils"
 
 interface CreatePostModalProps {
   onClose: () => void
@@ -58,22 +58,20 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
       
       if (selectedFiles.length > 0) {
         for (const file of selectedFiles) {
-          let fileToUpload = file
+          const formData = new FormData()
+          
           if (selectedMediaType === 'image') {
             try {
-              const options = {
-                maxSizeMB: 1,
-                maxWidthOrHeight: 1920,
-                useWebWorker: false
-              }
-              fileToUpload = await imageCompression(file, options)
+              const compressedFile = await compressImageToBase64(file, 1920)
+              const base64Data = compressedFile.split(',')[1]
+              formData.append("image", base64Data)
             } catch (compressionError) {
               console.error("Compression failed, using original file", compressionError)
-              fileToUpload = file
+              formData.append("image", file, file.name)
             }
+          } else {
+            formData.append("image", file, file.name)
           }
-          const formData = new FormData()
-          formData.append("image", fileToUpload)
           
           const response = await fetch("https://api.imgbb.com/1/upload?key=6e38ec9c63ca880872d00fe6e4be0417", {
             method: "POST",
