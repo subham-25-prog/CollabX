@@ -108,7 +108,12 @@ export function ProjectCard({ project, allUsers = [] }: ProjectCardProps) {
       <div className="p-5 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="text-xl font-bold text-foreground mb-1">{project.title}</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-xl font-bold text-foreground">{project.title}</h3>
+              <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20">
+                {project.type || 'Project'}
+              </span>
+            </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {timeAgo}</span>
               <span>•</span>

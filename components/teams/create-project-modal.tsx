@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { X, Loader2, Upload, Image as ImageIcon } from "lucide-react"
+import { X, Loader2, Upload, Image as ImageIcon, ChevronDown } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { createProject } from "@/lib/db"
 import { storage } from "@/lib/firebase"
@@ -16,7 +16,7 @@ interface CreateProjectModalProps {
 
 export function CreateProjectModal({ onClose, projectType: initialProjectType = 'project' }: CreateProjectModalProps) {
   const { profile } = useAuth()
-  const [currentProjectType, setCurrentProjectType] = useState<'project' | 'startup'>(initialProjectType)
+  const [currentProjectType, setCurrentProjectType] = useState<string>(initialProjectType)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [skills, setSkills] = useState("")
@@ -101,14 +101,22 @@ export function CreateProjectModal({ onClose, projectType: initialProjectType = 
           <form id="create-project-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Post Type</label>
-              <select
-                value={currentProjectType}
-                onChange={(e) => setCurrentProjectType(e.target.value as 'project' | 'startup')}
-                className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-primary/50 transition-colors outline-none text-foreground appearance-none"
-              >
-                <option value="project">Project Requirement</option>
-                <option value="startup">Startup Idea</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={currentProjectType}
+                  onChange={(e) => setCurrentProjectType(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-primary/50 transition-colors outline-none text-foreground appearance-none cursor-pointer"
+                >
+                  <option value="project">Project Requirement</option>
+                  <option value="startup">Startup Idea</option>
+                  <option value="college">College Project</option>
+                  <option value="research">Research Collaboration</option>
+                  <option value="hackathon">Competition/Hackathon</option>
+                  <option value="open-source">Open Source</option>
+                  <option value="study">Study Group</option>
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+              </div>
             </div>
 
             <div className="space-y-2">
