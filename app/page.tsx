@@ -53,7 +53,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-40 pb-32 px-4 sm:px-6 flex items-center min-h-screen">
+      <section className="relative pt-24 pb-16 px-4 sm:px-6 flex items-center">
         {/* Deep Animated Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,rgba(99,102,241,0.15),transparent_60%)]" />
@@ -334,27 +334,27 @@ export default function LandingPage() {
             Have questions or want to partner? Reach out directly.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6">
             <motion.div 
-              whileHover={{ y: -5 }}
-              className="glass p-6 rounded-2xl border border-white/10 flex flex-col items-center gap-3 group"
+              whileHover={{ y: -3 }}
+              className="glass p-3 sm:p-6 rounded-xl border border-white/10 flex flex-col items-center gap-2 group text-center"
             >
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Mail className="w-5 h-5 text-indigo-400" />
+              <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Mail className="w-4 h-4 text-indigo-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Email Us</h3>
-              <p className="text-indigo-400 font-medium">shubhamoy27@gmail.com</p>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Email Us</h3>
+              <p className="text-[10px] sm:text-xs text-indigo-400 font-medium truncate w-full">shubhamoy27@gmail.com</p>
             </motion.div>
             
             <motion.div 
-              whileHover={{ y: -5 }}
-              className="glass p-6 rounded-2xl border border-white/10 flex flex-col items-center gap-3 group"
+              whileHover={{ y: -3 }}
+              className="glass p-3 sm:p-6 rounded-xl border border-white/10 flex flex-col items-center gap-2 group text-center"
             >
-              <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Phone className="w-5 h-5 text-purple-400" />
+              <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Phone className="w-4 h-4 text-purple-400" />
               </div>
-              <h3 className="text-lg font-bold text-white">Call Us</h3>
-              <p className="text-purple-400 font-medium">+91 91444 57475</p>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Call Us</h3>
+              <p className="text-[10px] sm:text-xs text-purple-400 font-medium">+91 91444 57475</p>
             </motion.div>
           </div>
         </div>

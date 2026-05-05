@@ -237,14 +237,9 @@ export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
       }
     } catch (error) {
       console.error("Failed to send message", error)
-      toast.error("Failed to send message")
-      setNewMessage(messageText)
-      if (currentAttachment) {
-        setAttachment(currentAttachment)
-        setAttachmentPreview(previewUrl)
-        setAttachmentType(type)
-      }
+      toast.error("Message failed to send. Please check your connection.")
     } finally {
+      setIsSending(false)
       setSendingMessages(prev => prev.filter(m => m.id !== tempId))
     }
   }
@@ -265,8 +260,8 @@ export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-background/50">
-      <div className="flex items-center justify-between p-3 glass-strong border-b border-border">
+    <div className="flex-1 flex flex-col h-full bg-background/50 overflow-hidden relative">
+      <div className="sticky top-0 z-20 flex items-center justify-between p-3 glass-strong border-b border-border shrink-0">
         <div className="flex items-center gap-2 sm:gap-3">
           {onBack && (
             <motion.button
@@ -465,7 +460,7 @@ export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
       </div>
 
       {/* Input area */}
-      <div className="p-4 border-t border-border glass-strong flex flex-col gap-2">
+      <div className="p-4 border-t border-border glass-strong flex flex-col gap-2 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <AnimatePresence>
           {attachmentPreview && (
             <motion.div 

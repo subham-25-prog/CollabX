@@ -197,15 +197,15 @@ function ChatContent() {
   const selectedConversation = conversations.find((c) => c.id === selectedChat)
 
   return (
-    <div className="min-h-screen bg-background flex flex-col h-[100dvh]">
+    <div className="min-h-screen bg-background flex flex-col h-[100dvh] overflow-hidden">
       <div className={!isMobileListVisible ? "hidden lg:block" : ""}>
         <Navbar />
       </div>
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden h-full">
         <Sidebar />
-        <div className="flex-1 lg:ml-64 w-full min-w-0 flex flex-col">
-          <main className={`${isMobileListVisible ? 'pt-16 pb-20' : 'pt-0 pb-0'} lg:pt-16 lg:pb-0 flex-1 flex flex-col h-full`}>
-            <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 lg:ml-64 w-full min-w-0 flex flex-col h-full relative">
+          <main className={`${isMobileListVisible ? 'pt-16 pb-20' : 'pt-0 pb-0'} lg:pt-16 lg:pb-0 flex-1 flex flex-col h-full overflow-hidden`}>
+            <div className="flex-1 flex overflow-hidden h-full">
           {/* Chat list - Desktop always visible, Mobile conditional */}
           <div
             className={`${
@@ -229,17 +229,14 @@ function ChatContent() {
           <div
             className={`${
               !isMobileListVisible ? "flex" : "hidden"
-            } lg:flex flex-1 flex-col relative`}
+            } lg:flex flex-1 flex-col relative overflow-hidden h-full`}
           >
             {selectedConversation ? (
-              <>
-                {/* The ChatWindow component now handles its own header and mobile back button */}
-                <ChatWindow
-                  conversation={selectedConversation}
-                  chatId={selectedChat!}
-                  onBack={handleBackToList}
-                />
-              </>
+              <ChatWindow
+                conversation={selectedConversation}
+                chatId={selectedChat!}
+                onBack={handleBackToList}
+              />
             ) : (
               <div className="hidden lg:flex flex-1 items-center justify-center">
                 <div className="text-center">
