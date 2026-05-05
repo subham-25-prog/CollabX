@@ -28,15 +28,7 @@ export default function LandingPage() {
               </span>
             </Link>
             
-            {profile && (
-              <div className="hidden md:flex items-center gap-8 bg-white/5 px-6 py-2 rounded-full border border-white/10 shadow-[0_0_15px_rgba(99,102,241,0.05)]">
-                <Link href="/" className="text-sm font-semibold text-white transition-colors">Home</Link>
-                <Link href="/teams" className="text-sm font-semibold text-slate-400 hover:text-white transition-colors">Find Team</Link>
-                <Link href="/feed" className="text-sm font-semibold text-slate-400 hover:text-white transition-colors">Post</Link>
-                <Link href="/chat" className="text-sm font-semibold text-slate-400 hover:text-white transition-colors">Chat</Link>
-                <Link href="/profile" className="text-sm font-semibold text-slate-400 hover:text-white transition-colors">Profile</Link>
-              </div>
-            )}
+            {/* Internal navigation links removed from landing page per user request */}
             
             <div className="flex items-center gap-4">
               <Link 
