@@ -39,9 +39,18 @@ interface PostCardProps {
 export function PostCard({ post, onDelete }: PostCardProps) {
   const { profile } = useAuth()
   
-  const isLiked = profile ? post.likes.includes(profile.uid) : false
-  const likesCount = post.likes.length
+  const initialIsLiked = profile ? post.likes.includes(profile.uid) : false
+  const initialLikesCount = post.likes.length
+
+  const [localIsLiked, setLocalIsLiked] = useState(initialIsLiked)
+  const [localLikesCount, setLocalLikesCount] = useState(initialLikesCount)
   const [isSaved, setIsSaved] = useState(false)
+
+  // Sync local state when post prop updates from server
+  React.useEffect(() => {
+    setLocalIsLiked(initialIsLiked)
+    setLocalLikesCount(initialLikesCount)
+  }, [initialIsLiked, initialLikesCount])
   const [showComments, setShowComments] = useState(false)
   const [isLiking, setIsLiking] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
@@ -86,10 +95,20 @@ export function PostCard({ post, onDelete }: PostCardProps) {
   const handleLike = async () => {
     if (!profile || isLiking) return
     
+    // Optimistic UI update
+    const previousIsLiked = localIsLiked
+    const previousLikesCount = localLikesCount
+    
+    setLocalIsLiked(!previousIsLiked)
+    setLocalLikesCount(prev => previousIsLiked ? prev - 1 : prev + 1)
+    
     setIsLiking(true)
     try {
-      await toggleLikePost(post.id, profile.uid, isLiked, profile.name || "Someone") 
+      await toggleLikePost(post.id, profile.uid, previousIsLiked, profile.name || "Someone") 
     } catch (error) {
+      // Revert on error
+      setLocalIsLiked(previousIsLiked)
+      setLocalLikesCount(previousLikesCount)
       toast.error("Failed to like post")
     } finally {
       setIsLiking(false)
@@ -174,6 +193,15 @@ export function PostCard({ post, onDelete }: PostCardProps) {
           </DropdownMenu.Root>
         </div>
       </div>
+
+      {/* Content (Text) */}
+      {post.content && (
+        <div className="px-4 pb-3">
+          <p className="text-[15px] text-foreground leading-relaxed whitespace-pre-wrap break-words">
+            {post.content}
+          </p>
+        </div>
+      )}
 
       {/* Images/Media */}
       {post.images && post.images.length > 0 ? (
@@ -296,9 +324,9 @@ export function PostCard({ post, onDelete }: PostCardProps) {
           <motion.button
             whileTap={{ scale: 0.85 }}
             onClick={handleLike}
-            className={`transition-colors ${isLiked ? "text-pink-500" : "text-foreground hover:text-muted-foreground"}`}
+            className={`transition-colors ${localIsLiked ? "text-pink-500" : "text-foreground hover:text-muted-foreground"}`}
           >
-            <Heart className={`w-[26px] h-[26px] ${isLiked ? "fill-current" : ""}`} />
+            <Heart className={`w-[26px] h-[26px] ${localIsLiked ? "fill-current" : ""}`} />
           </motion.button>
 
           <motion.button
@@ -344,21 +372,9 @@ export function PostCard({ post, onDelete }: PostCardProps) {
       </div>
 
       {/* Likes */}
-      {likesCount > 0 && (
+      {localLikesCount > 0 && (
         <div className="px-4 pb-1">
-          <span className="font-semibold text-sm text-foreground">{likesCount} {likesCount === 1 ? 'like' : 'likes'}</span>
-        </div>
-      )}
-
-      {/* Content (Caption) */}
-      {(post.content || !post.image) && (
-        <div className="px-4 pb-1">
-          <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words">
-            <Link href={`/profile?id=${post.author.id}`} className="font-semibold hover:underline mr-2">
-              {post.author.name}
-            </Link>
-            {post.content}
-          </p>
+          <span className="font-semibold text-sm text-foreground">{localLikesCount} {localLikesCount === 1 ? 'like' : 'likes'}</span>
         </div>
       )}
 

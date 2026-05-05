@@ -66,6 +66,52 @@ export default function NotificationsPage() {
     }
   }
 
+  const renderMessage = (notif: Notification) => {
+    if (!notif.senderId) return notif.message;
+
+    let name = "";
+    let restOfMessage = notif.message;
+
+    if (notif.type === 'like' && notif.message.includes(" liked your post")) {
+      name = notif.message.split(" liked your post")[0];
+      restOfMessage = notif.message.substring(name.length);
+    } else if (notif.type === 'comment' && notif.message.includes(" commented on your post")) {
+      name = notif.message.split(" commented on your post")[0];
+      restOfMessage = notif.message.substring(name.length);
+    } else if (notif.type === 'follow' && notif.message.includes("Someone started following you")) {
+      name = "Someone";
+      restOfMessage = notif.message.substring(name.length);
+    } else if (notif.type === 'application' && notif.message.includes("Someone applied to your project:")) {
+      name = "Someone";
+      restOfMessage = notif.message.substring(name.length);
+    } else if (notif.type === 'invite_accepted' && notif.message.includes("A user has accepted your invitation")) {
+      name = "A user";
+      restOfMessage = notif.message.substring(name.length);
+    } else if (notif.type === 'project_invite' && notif.message.includes(" invited you to join their project:")) {
+      name = notif.message.split(" invited you to join their project:")[0];
+      restOfMessage = notif.message.substring(name.length);
+    }
+
+    if (name) {
+      return (
+        <>
+          <span 
+            className="font-bold hover:underline cursor-pointer text-primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/profile?id=${notif.senderId}`);
+            }}
+          >
+            {name}
+          </span>
+          {restOfMessage}
+        </>
+      );
+    }
+
+    return notif.message;
+  }
+
   if (authLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-background">
@@ -161,8 +207,8 @@ export default function NotificationsPage() {
                             {getNotificationIcon(notif.type)}
                           </div>
                           <div className="flex-1 space-y-1">
-                            <p className={`text-base ${notif.read ? 'text-foreground' : 'text-foreground font-semibold'}`}>
-                              {notif.message}
+                            <p className={`text-base ${notif.read ? 'text-foreground' : 'text-foreground font-medium'}`}>
+                              {renderMessage(notif)}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {notif.timestamp?.toDate ? new Date(notif.timestamp.toDate()).toLocaleDateString() : 'Just now'}

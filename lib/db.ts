@@ -49,9 +49,17 @@ export async function voteOnPoll(postId: string, userId: string, optionId: strin
     opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
   )
   
+  const updatedPoll = {
+    ...data.poll,
+    options: newOptions,
+    votedUsers: {
+      ...(data.poll.votedUsers || {}),
+      [userId]: optionId
+    }
+  }
+
   await updateDoc(postRef, {
-    "poll.options": newOptions,
-    [`poll.votedUsers.${userId}`]: optionId
+    poll: updatedPoll
   })
 }
 
@@ -75,7 +83,7 @@ export async function toggleLikePost(postId: string, userId: string, isLiked: bo
           type: 'like',
           title: 'New Like',
           message: `${userName} liked your post.`,
-          link: `/profile?id=${userId}`,
+          link: `/feed?post=${postId}`,
           senderId: userId
         })
       }
@@ -107,7 +115,7 @@ export async function createComment(postId: string, author: { id: string, name: 
         type: 'comment',
         title: 'New Comment',
         message: `${author.name} commented on your post: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
-        link: `/profile?id=${author.id}`,
+        link: `/feed?post=${postId}`,
         senderId: author.id
       })
     }

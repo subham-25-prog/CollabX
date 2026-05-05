@@ -414,7 +414,9 @@ export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
                 </Link>
               )}
               <div
-                className={`relative max-w-[85%] sm:max-w-[75%] px-4 py-3 shadow-sm text-[15px] break-words overflow-hidden ${
+                className={`relative max-w-[85%] sm:max-w-[75%] shadow-sm text-[15px] break-words overflow-hidden ${
+                  (!message.content && message.imageUrl) ? "p-1 pb-5" : "px-4 py-3"
+                } ${
                   message.sender === "me"
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 rounded-2xl rounded-br-md ml-auto"
                     : "glass rounded-2xl rounded-bl-md mr-auto"
@@ -422,20 +424,20 @@ export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
               >
 
                 {message.sender !== "me" && conversation.user.isGroup && message.senderName && (
-                  <p className={`text-xs font-bold mb-1 ${getStringColor(message.senderName)}`}>{message.senderName}</p>
+                  <p className={`text-xs font-bold ${(!message.content && message.imageUrl) ? 'px-2 pt-1 mb-1' : 'mb-1'} ${getStringColor(message.senderName)}`}>{message.senderName}</p>
                 )}
                 {message.imageUrl && (
                   message.mediaType === 'video' ? (
                     <video 
                       src={message.imageUrl} 
                       controls
-                      className="w-full max-w-sm rounded-lg mb-2 object-cover bg-black/10" 
+                      className={`w-full max-w-sm rounded-[12px] object-cover bg-black/10 ${message.content ? 'mb-2' : ''}`} 
                     />
                   ) : (
                     <img 
                       src={message.imageUrl} 
                       alt="Attachment" 
-                      className="w-full max-w-sm rounded-lg mb-2 object-cover" 
+                      className={`w-full max-w-sm rounded-[12px] object-cover ${message.content ? 'mb-2' : ''}`} 
                     />
                   )
                 )}
