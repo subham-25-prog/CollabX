@@ -4,16 +4,16 @@ import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
-import { Cake, Trophy, PartyPopper, Sparkles, ChevronLeft, ChevronRight, Plus, Heart, Trash2, X } from "lucide-react"
+import { Cake, Trophy, PartyPopper, Sparkles, ChevronLeft, ChevronRight, Plus, Heart, Trash2, X, Megaphone, Zap, BadgePercent } from "lucide-react"
 import { CreateCelebrationModal } from "./create-celebration-modal"
 import { toggleLikeCelebration, deleteCelebration } from "@/lib/db"
 import { useAuth } from "@/components/auth/auth-provider"
 
 const THEME_MAP: any = {
-  birthday: { icon: Cake, color: 'text-pink-500', bg: 'bg-pink-500/10', label: 'Birthday' },
-  achievement: { icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10', label: 'Achievement' },
-  celebration: { icon: PartyPopper, color: 'text-purple-500', bg: 'bg-purple-500/10', label: 'Celebration' },
-  shoutout: { icon: Sparkles, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Shoutout' },
+  announcement: { icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Announcement' },
+  promotion: { icon: Zap, color: 'text-yellow-500', bg: 'bg-yellow-500/10', label: 'Promotion' },
+  advertisement: { icon: BadgePercent, color: 'text-purple-500', bg: 'bg-purple-500/10', label: 'Sponsored' },
+  celebration: { icon: PartyPopper, color: 'text-pink-500', bg: 'bg-pink-500/10', label: 'Celebration' },
 }
 
 export function CelebrationsWidget() {
@@ -67,7 +67,7 @@ export function CelebrationsWidget() {
     const currentCelebration = celebrations.find(c => c.id === id)
     if (!profile || (!isAdmin && currentCelebration?.author?.id !== profile.uid)) return
 
-    if (confirm("Are you sure you want to delete this celebration?")) {
+    if (confirm("Are you sure you want to delete this post from the billboard?")) {
       try {
         await deleteCelebration(id)
       } catch (error) {
@@ -85,11 +85,11 @@ export function CelebrationsWidget() {
           <Sparkles className="w-4 h-4 text-primary" />
           The Billboard
         </h3>
-        {profile && (
+        {isAdmin && (
           <button 
             onClick={() => setShowModal(true)}
             className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-            title="Post a wish"
+            title="Create Post"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -109,7 +109,7 @@ export function CelebrationsWidget() {
               <div className="relative aspect-[4/5] overflow-hidden">
                 <img 
                   src={celebrations[currentIndex].imageUrl} 
-                  alt="Celebration" 
+                  alt="Billboard Post" 
                   className="w-full h-full object-cover cursor-pointer"
                   onClick={() => setExpandedCelebration(celebrations[currentIndex])}
                 />
@@ -122,7 +122,7 @@ export function CelebrationsWidget() {
                       className: `w-3.5 h-3.5 ${THEME_MAP[celebrations[currentIndex].type]?.color || 'text-primary'}`
                     })}
                     <span className="text-[10px] font-bold uppercase tracking-widest text-white">
-                      {THEME_MAP[celebrations[currentIndex].type]?.label || 'Celebration'}
+                      {THEME_MAP[celebrations[currentIndex].type]?.label || 'Billboard Post'}
                     </span>
                   </div>
                   {(isAdmin || profile?.uid === celebrations[currentIndex].author.id) && (
@@ -132,7 +132,7 @@ export function CelebrationsWidget() {
                         handleDelete(celebrations[currentIndex].id)
                       }}
                       className="p-2 rounded-full bg-black/40 text-red-500 hover:bg-red-500 hover:text-white transition-colors backdrop-blur-md border border-white/10 pointer-events-auto"
-                      title="Delete celebration"
+                      title="Delete post"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -175,18 +175,18 @@ export function CelebrationsWidget() {
           ) : (
             <div className="glass rounded-2xl p-8 text-center space-y-3 border border-dashed border-white/10">
               <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto opacity-50">
-                <Cake className="w-6 h-6 text-muted-foreground" />
+                <Megaphone className="w-6 h-6 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground">No wishes yet</p>
-                <p className="text-xs text-muted-foreground mt-1">Be the first to celebrate someone!</p>
+                <p className="text-sm font-medium text-foreground">No posts yet</p>
+                <p className="text-xs text-muted-foreground mt-1">Stay tuned for updates and announcements!</p>
               </div>
-              {profile && (
+              {isAdmin && (
                 <button 
                   onClick={() => setShowModal(true)}
                   className="text-xs font-bold text-primary hover:underline"
                 >
-                  + Post a wish
+                  + Create Post
                 </button>
               )}
             </div>
@@ -237,7 +237,7 @@ export function CelebrationsWidget() {
               <div className="flex-1 bg-black min-h-[40vh] md:min-h-[auto] flex items-center justify-center relative">
                 <img 
                   src={expandedCelebration.imageUrl} 
-                  alt="Celebration" 
+                  alt="Billboard Post" 
                   className="max-w-full max-h-[60vh] md:max-h-[90vh] object-contain"
                 />
               </div>
@@ -251,7 +251,7 @@ export function CelebrationsWidget() {
                   />
                   <div>
                     <p className="font-semibold text-sm">{expandedCelebration.author.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{THEME_MAP[expandedCelebration.type]?.label || 'Celebration'}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{THEME_MAP[expandedCelebration.type]?.label || 'Billboard Post'}</p>
                   </div>
                 </div>
                 

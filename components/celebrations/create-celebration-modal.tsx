@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Image as ImageIcon, Sparkles, PartyPopper, Cake, Trophy, Loader2 } from "lucide-react"
+import { X, Image as ImageIcon, Sparkles, PartyPopper, Cake, Trophy, Loader2, Megaphone, Zap, BadgePercent } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { createCelebration } from "@/lib/db"
 import { toast } from "sonner"
@@ -13,10 +13,10 @@ interface CreateCelebrationModalProps {
 }
 
 const THEMES = [
-  { id: 'birthday', label: 'Birthday', icon: Cake, color: 'text-pink-500', bg: 'bg-pink-500/10' },
-  { id: 'achievement', label: 'Achievement', icon: Trophy, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
-  { id: 'celebration', label: 'Celebrate', icon: PartyPopper, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-  { id: 'shoutout', label: 'Shoutout', icon: Sparkles, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { id: 'announcement', label: 'Announcement', icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { id: 'promotion', label: 'Promotion', icon: Zap, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
+  { id: 'advertisement', label: 'Sponsored', icon: BadgePercent, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  { id: 'celebration', label: 'Celebration', icon: PartyPopper, color: 'text-pink-500', bg: 'bg-pink-500/10' },
 ]
 
 export function CreateCelebrationModal({ onClose }: CreateCelebrationModalProps) {
@@ -43,7 +43,7 @@ export function CreateCelebrationModal({ onClose }: CreateCelebrationModalProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!content.trim() || !image || !profile) {
-      toast.error("Please provide both a wish and an image!")
+      toast.error("Please provide both text content and an image!")
       return
     }
 
@@ -70,22 +70,26 @@ export function CreateCelebrationModal({ onClose }: CreateCelebrationModalProps)
         selectedTheme.id
       )
 
-      toast.success("Celebration posted to the Billboard! 🎉")
+      toast.success("Successfully posted to the Billboard! 🚀")
       onClose()
     } catch (error) {
       console.error(error)
-      toast.error("Failed to post celebration")
+      toast.error("Failed to post to billboard")
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+      onClick={onClose}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        onClick={(e) => e.stopPropagation()}
         className="w-full max-w-lg glass-strong rounded-3xl overflow-hidden shadow-2xl border border-white/20"
       >
         <div className="flex items-center justify-between p-6 border-b border-white/10">
@@ -93,10 +97,14 @@ export function CreateCelebrationModal({ onClose }: CreateCelebrationModalProps)
             <div className={`p-2 rounded-xl ${selectedTheme.bg}`}>
               <selectedTheme.icon className={`w-6 h-6 ${selectedTheme.color}`} />
             </div>
-            <h2 className="text-xl font-bold text-foreground">Post a Wish</h2>
+            <h2 className="text-xl font-bold text-foreground">Create Billboard Post</h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors">
-            <X className="w-6 h-6 text-muted-foreground" />
+          <button 
+            type="button" 
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }} 
+            className="p-2 rounded-full hover:bg-white/10 transition-colors z-50 relative cursor-pointer"
+          >
+            <X className="w-6 h-6 text-muted-foreground hover:text-white transition-colors" />
           </button>
         </div>
 
@@ -150,13 +158,13 @@ export function CreateCelebrationModal({ onClose }: CreateCelebrationModalProps)
             />
           </div>
 
-          {/* Wish Content */}
+          {/* Content */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground pl-1">Your Message</label>
+            <label className="text-sm font-medium text-muted-foreground pl-1">Your Message / Copy</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your celebration wish here..."
+              placeholder="Write your announcement, promotion, or content here..."
               className="w-full h-24 bg-white/5 border border-white/10 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-primary/50 transition-all text-foreground placeholder:text-muted-foreground resize-none"
             />
           </div>
