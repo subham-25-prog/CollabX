@@ -40,6 +40,7 @@ function FeedContent() {
   const [lastVisible, setLastVisible] = useState<any>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [pageLoadTime, setPageLoadTime] = useState<Date | null>(null)
+  const [newPosts, setNewPosts] = useState<any[]>([])
   
   // Find post if postParam exists
   const selectedPost = postParam ? posts.find(p => p.id === postParam) : null
@@ -125,9 +126,9 @@ function FeedContent() {
     else setIsLoading(true);
 
     try {
-      let q = query(collection(db, "posts"), orderBy("timestamp", "asc"), limit(40));
+      let q = query(collection(db, "posts"), orderBy("timestamp", "desc"), limit(40));
       if (isLoadMore && lastVisible) {
-        q = query(collection(db, "posts"), orderBy("timestamp", "asc"), startAfter(lastVisible), limit(40));
+        q = query(collection(db, "posts"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(40));
       }
 
       const snapshot = await getDocs(q);
@@ -177,7 +178,7 @@ function FeedContent() {
     const q = query(
       collection(db, "posts"), 
       where("timestamp", ">", pageLoadTime), 
-      orderBy("timestamp", "asc")
+      orderBy("timestamp", "desc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -193,17 +194,10 @@ function FeedContent() {
       });
 
       if (newIncoming.length > 0) {
-        setPosts(prev => {
-          // Append new posts to the end of the feed
-          const combined = [...prev, ...newIncoming];
-          // Remove duplicates
+        setNewPosts(prev => {
+          const combined = [...newIncoming, ...prev];
           const uniqueMap = new Map();
-          combined.forEach(p => {
-            if (!uniqueMap.has(p.id)) {
-              uniqueMap.set(p.id, p);
-            }
-          });
-          
+          combined.forEach(p => uniqueMap.set(p.id, p));
           return Array.from(uniqueMap.values());
         });
       }
@@ -267,7 +261,29 @@ function FeedContent() {
               </div>
             </motion.div>
 
-            {/* New posts now integrate automatically without a popup indicator */}
+            {/* New Posts Indicator */}
+            <AnimatePresence>
+              {newPosts.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="flex justify-center sticky top-20 z-30 mb-4"
+                >
+                  <button
+                    onClick={() => {
+                      setPosts(prev => [...newPosts, ...prev]);
+                      setNewPosts([]);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-bold shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    See {newPosts.length} new post{newPosts.length > 1 ? 's' : ''}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Posts feed */}
             {isLoading ? (
