@@ -37,31 +37,33 @@ export async function createPost(author: { id: string, name: string, avatar: str
 }
 
 export async function voteOnPoll(postId: string, userId: string, optionId: string) {
+  const { runTransaction } = await import("firebase/firestore")
   const postRef = doc(db, "posts", postId)
-  const postSnap = await getDoc(postRef)
-  
-  if (!postSnap.exists()) throw new Error("Post not found")
-  
-  const data = postSnap.data()
-  if (!data.poll) throw new Error("Post does not have a poll")
-  if (data.poll.votedUsers && data.poll.votedUsers[userId]) throw new Error("User already voted")
-  
-  const newOptions = data.poll.options.map((opt: any) => 
-    opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
-  )
-  
-  const updatedPoll = {
-    ...data.poll,
-    options: newOptions,
-    votedUsers: {
-      ...(data.poll.votedUsers || {}),
-      [userId]: optionId
-    }
-  }
 
-  await updateDoc(postRef, {
-    poll: updatedPoll
-  })
+  try {
+    await runTransaction(db, async (transaction) => {
+      const postSnap = await transaction.get(postRef)
+      if (!postSnap.exists()) throw new Error("Post not found")
+
+      const data = postSnap.data()
+      if (!data.poll) throw new Error("Post does not have a poll")
+
+      const votedUsers = data.poll.votedUsers || {}
+      if (votedUsers[userId]) throw new Error("User already voted")
+
+      const newOptions = data.poll.options.map((opt: any) =>
+        opt.id === optionId ? { ...opt, votes: (opt.votes || 0) + 1 } : opt
+      )
+
+      transaction.update(postRef, {
+        "poll.options": newOptions,
+        [`poll.votedUsers.${userId}`]: optionId
+      })
+    })
+  } catch (error) {
+    console.error("Transaction failed: ", error)
+    throw error
+  }
 }
 
 export async function togglePinPost(postId: string, isPinned: boolean) {
