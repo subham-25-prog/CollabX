@@ -14,7 +14,7 @@ const CelebrationsWidget = dynamic(() => import("@/components/celebrations/celeb
 const AdsWidget = dynamic(() => import("@/components/ads/ads-widget").then(mod => mod.AdsWidget), { ssr: false })
 import { collection, query, orderBy, onSnapshot, doc, setDoc, addDoc, serverTimestamp, limit, getDocs, startAfter, where } from "firebase/firestore"
 import { db } from "@/lib/firebase"
-import { Loader2, Image, Smile, BarChart2 } from "lucide-react"
+import { Loader2, Image, Smile, BarChart2, Sparkles } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense } from "react"
@@ -272,7 +272,12 @@ function FeedContent() {
                 >
                   <button
                     onClick={() => {
-                      setPosts(prev => [...newPosts, ...prev]);
+                      setPosts(prev => {
+                        const combined = [...newPosts, ...prev];
+                        const uniqueMap = new Map();
+                        combined.forEach(p => uniqueMap.set(p.id, p));
+                        return Array.from(uniqueMap.values());
+                      });
                       setNewPosts([]);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
