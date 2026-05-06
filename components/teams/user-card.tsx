@@ -32,6 +32,9 @@ const availabilityColors: Record<string, string> = {
   Busy: "bg-red-500/20 text-red-400 border-red-500/30",
 }
 
+import { Shield, ShieldAlert, ShieldCheck } from "lucide-react"
+import { toast } from "sonner"
+
 export function UserCard({ user }: UserCardProps) {
   const router = useRouter()
   const { profile: currentUser } = useAuth()

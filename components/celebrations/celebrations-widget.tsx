@@ -104,10 +104,9 @@ export function CelebrationsWidget() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="glass overflow-hidden rounded-2xl border border-white/10 shadow-lg flex flex-col"
-              style={{ maxHeight: '45vh' }}
+              className="glass overflow-hidden rounded-2xl border border-white/10 shadow-lg"
             >
-              <div className="relative flex-1 overflow-hidden min-h-0">
+              <div className="relative aspect-[4/5] overflow-hidden">
                 <img 
                   src={celebrations[currentIndex].imageUrl} 
                   alt="Billboard Post" 

@@ -82,8 +82,7 @@ export function AdsWidget() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="glass rounded-2xl p-4 border border-border/50 relative overflow-hidden flex flex-col"
-              style={{ maxHeight: '45vh' }}
+              className="glass rounded-2xl p-4 border border-border/50 relative overflow-hidden"
             >
               <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider z-10 flex items-center gap-2">
                 Ad
@@ -100,7 +99,7 @@ export function AdsWidget() {
                 )}
               </div>
               
-              <div className="overflow-hidden rounded-xl mb-3 flex-1 relative min-h-0">
+              <div className="overflow-hidden rounded-xl mb-3 h-32 relative">
                 <img 
                   src={ads[currentIndex].imageUrl} 
                   alt={ads[currentIndex].title} 
