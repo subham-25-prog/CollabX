@@ -65,7 +65,7 @@ export function CelebrationsWidget() {
   const handleDelete = async (id: string) => {
     // Check if user is admin or the author
     const currentCelebration = celebrations.find(c => c.id === id)
-    if (!profile || (!isAdmin && currentCelebration?.author?.id !== profile.uid)) return
+    if (!profile || !isAdmin) return
 
     if (confirm("Are you sure you want to delete this post from the billboard?")) {
       try {
@@ -125,7 +125,7 @@ export function CelebrationsWidget() {
                       {THEME_MAP[celebrations[currentIndex].type]?.label || 'Billboard Post'}
                     </span>
                   </div>
-                  {(isAdmin || profile?.uid === celebrations[currentIndex].author.id) && (
+                  {isAdmin && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
