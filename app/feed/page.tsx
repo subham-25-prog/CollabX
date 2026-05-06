@@ -125,9 +125,9 @@ function FeedContent() {
     else setIsLoading(true);
 
     try {
-      let q = query(collection(db, "posts"), orderBy("timestamp", "desc"), limit(40));
+      let q = query(collection(db, "posts"), orderBy("timestamp", "asc"), limit(40));
       if (isLoadMore && lastVisible) {
-        q = query(collection(db, "posts"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(40));
+        q = query(collection(db, "posts"), orderBy("timestamp", "asc"), startAfter(lastVisible), limit(40));
       }
 
       const snapshot = await getDocs(q);
@@ -177,7 +177,7 @@ function FeedContent() {
     const q = query(
       collection(db, "posts"), 
       where("timestamp", ">", pageLoadTime), 
-      orderBy("timestamp", "desc")
+      orderBy("timestamp", "asc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -194,8 +194,8 @@ function FeedContent() {
 
       if (newIncoming.length > 0) {
         setPosts(prev => {
-          // Score new posts relative to current time
-          const combined = [...newIncoming, ...prev];
+          // Append new posts to the end of the feed
+          const combined = [...prev, ...newIncoming];
           // Remove duplicates
           const uniqueMap = new Map();
           combined.forEach(p => {
@@ -204,10 +204,7 @@ function FeedContent() {
             }
           });
           
-          const unique = Array.from(uniqueMap.values());
-          // Sort the top portion if needed, but for "Live" we mostly just prepend
-          // since they are all very recent.
-          return unique;
+          return Array.from(uniqueMap.values());
         });
       }
     });
