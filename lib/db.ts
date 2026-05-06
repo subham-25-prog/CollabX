@@ -140,13 +140,16 @@ export async function getAllUsers() {
 }
 
 export async function updateUserProfile(userId: string, data: any) {
-  // Security: Prevent users from changing their own role to Admin through the UI
-  const { role, ...safeData } = data
+  // Security: Prevent users from self-elevating to Admin
+  const finalData = { ...data }
+  if (finalData.role && finalData.role.toLowerCase().includes('admin')) {
+    delete finalData.role
+  }
   
   const userRef = doc(db, "users", userId)
   const batch = writeBatch(db)
   
-  batch.update(userRef, safeData)
+  batch.update(userRef, finalData)
 
   if (data.name !== undefined || data.avatar !== undefined || data.role !== undefined) {
     const postsQuery = query(collection(db, "posts"), where("author.id", "==", userId))
@@ -559,4 +562,15 @@ export async function createAd(author: { id: string, name: string, avatar: strin
 
 export async function deleteAd(adId: string) {
   return await deleteDoc(doc(db, "ads", adId))
+}
+// FEEDBACK
+export async function createFeedback(userId: string, userName: string, type: string, message: string) {
+  return await addDoc(collection(db, "feedback"), {
+    userId,
+    userName,
+    type,
+    message,
+    status: "pending",
+    timestamp: serverTimestamp()
+  })
 }

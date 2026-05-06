@@ -2,12 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "@/components/auth/auth-provider"
-import { Home, Users, MessageCircle, User, Settings, LogOut, Sparkles, ShieldCheck } from "lucide-react"
+import { Home, Users, MessageCircle, User, Settings, LogOut, Sparkles, ShieldCheck, MessageSquare } from "lucide-react"
 
 import { useNotifications } from "@/hooks/use-notifications"
 import { InstallPWAButton } from "@/components/pwa/install-button"
+import { FeedbackModal } from "@/components/feedback/feedback-modal"
+import { useState } from "react"
 
 const navItems: { icon: any; label: string; href: string; badge?: number }[] = [
   { icon: Home, label: "Home Feed", href: "/feed" },
@@ -25,6 +27,7 @@ export function Sidebar() {
   const pathname = usePathname()
   const { profile } = useAuth()
   const { unreadCount, notifications } = useNotifications()
+  const [showFeedback, setShowFeedback] = useState(false)
 
   const getAvatarImage = () => {
     const p = profile as any;
@@ -94,6 +97,28 @@ export function Sidebar() {
 
       {/* Bottom navigation */}
       <div className="p-4 border-t border-border space-y-1">
+        {profile?.role?.toLowerCase() !== 'admin' && (
+          <button
+            onClick={() => setShowFeedback(true)}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200 w-full text-left"
+          >
+            <Sparkles className="w-5 h-5 text-yellow-500" />
+            <span className="font-medium">Feedback</span>
+          </button>
+        )}
+
+        {profile?.role?.toLowerCase() === 'admin' && (
+          <Link href="/admin/feedback">
+            <motion.div
+              whileHover={{ x: 4 }}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200"
+            >
+              <MessageSquare className="w-5 h-5 text-indigo-400" />
+              <span className="font-medium">View Feedbacks</span>
+            </motion.div>
+          </Link>
+        )}
+
         {bottomItems.map((item) => (
           <Link key={item.href} href={item.href}>
             <motion.div
@@ -107,6 +132,12 @@ export function Sidebar() {
         ))}
         <InstallPWAButton />
       </div>
+
+      <AnimatePresence>
+        {showFeedback && (
+          <FeedbackModal onClose={() => setShowFeedback(false)} />
+        )}
+      </AnimatePresence>
     </aside>
   )
 }

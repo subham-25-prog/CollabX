@@ -71,9 +71,16 @@ export default function OnboardingPage() {
 
     try {
       const userRef = doc(db, "users", user.uid)
+      
+      // Security: Sanitize role to prevent unauthorized admin access
+      let sanitizedRole = formData.role || "Student"
+      if (sanitizedRole.toLowerCase().includes('admin')) {
+        sanitizedRole = "Student"
+      }
+
       await updateDoc(userRef, {
         name: formData.name || "Student",
-        role: formData.role || "Student",
+        role: sanitizedRole,
         gender: formData.gender || "Not specified",
         location: formData.location || "Earth",
         bio: formData.bio || "I'm ready to collaborate!",

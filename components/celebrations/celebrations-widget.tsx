@@ -8,6 +8,7 @@ import { Cake, Trophy, PartyPopper, Sparkles, ChevronLeft, ChevronRight, Plus, H
 import { CreateCelebrationModal } from "./create-celebration-modal"
 import { toggleLikeCelebration, deleteCelebration } from "@/lib/db"
 import { useAuth } from "@/components/auth/auth-provider"
+import { checkIsAdmin } from "@/lib/admin"
 
 const THEME_MAP: any = {
   announcement: { icon: Megaphone, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Announcement' },
@@ -18,6 +19,7 @@ const THEME_MAP: any = {
 
 export function CelebrationsWidget() {
   const { profile } = useAuth()
+  const isAdmin = checkIsAdmin(profile)
   const [celebrations, setCelebrations] = useState<any[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showModal, setShowModal] = useState(false)
@@ -52,15 +54,13 @@ export function CelebrationsWidget() {
   }, [celebrations.length])
 
   const handleLike = async (id: string, isLiked: boolean) => {
-    if (!profile) return
+    if (!profile || !isAdmin) return
     try {
       await toggleLikeCelebration(id, profile.uid, isLiked)
     } catch (error) {
       console.error("Failed to like celebration", error)
     }
   }
-
-  const isAdmin = profile?.role === 'admin' || profile?.email === 'shubhamoy27@gmail.com'
 
   const handleDelete = async (id: string) => {
     // Check if user is admin or the author
@@ -104,9 +104,10 @@ export function CelebrationsWidget() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="glass overflow-hidden rounded-2xl border border-white/10 shadow-lg"
+              className="glass overflow-hidden rounded-2xl border border-white/10 shadow-lg flex flex-col"
+              style={{ maxHeight: '45vh' }}
             >
-              <div className="relative aspect-[4/5] overflow-hidden">
+              <div className="relative flex-1 overflow-hidden min-h-0">
                 <img 
                   src={celebrations[currentIndex].imageUrl} 
                   alt="Billboard Post" 
@@ -157,17 +158,17 @@ export function CelebrationsWidget() {
                       </span>
                     </div>
 
-                    <button 
-                      onClick={() => handleLike(celebrations[currentIndex].id, celebrations[currentIndex].likes?.includes(profile?.uid))}
+                    <div 
                       className={`flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-md transition-all ${
                         celebrations[currentIndex].likes?.includes(profile?.uid) 
                           ? 'bg-pink-500/20 text-pink-500' 
-                          : 'bg-white/10 text-white/60 hover:bg-white/20'
-                      }`}
+                          : 'bg-white/10 text-white/60'
+                      } ${isAdmin ? 'cursor-pointer hover:bg-white/20' : 'cursor-default'}`}
+                      onClick={() => isAdmin && handleLike(celebrations[currentIndex].id, celebrations[currentIndex].likes?.includes(profile?.uid))}
                     >
                       <Heart className={`w-3 h-3 ${celebrations[currentIndex].likes?.includes(profile?.uid) ? 'fill-current' : ''}`} />
                       <span className="text-[10px] font-bold">{celebrations[currentIndex].likes?.length || 0}</span>
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -262,8 +263,14 @@ export function CelebrationsWidget() {
                 </div>
                 
                 <div className="pt-4 border-t border-border">
-                  <button 
+                  <div 
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all w-full justify-center ${
+                      expandedCelebration.likes?.includes(profile?.uid) 
+                        ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20' 
+                        : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                    } ${isAdmin ? 'cursor-pointer' : 'cursor-default opacity-80'}`}
                     onClick={() => {
+                      if (!isAdmin) return
                       handleLike(expandedCelebration.id, expandedCelebration.likes?.includes(profile?.uid))
                       setExpandedCelebration({
                         ...expandedCelebration,
@@ -272,15 +279,10 @@ export function CelebrationsWidget() {
                           : [...(expandedCelebration.likes || []), profile?.uid]
                       })
                     }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all w-full justify-center ${
-                      expandedCelebration.likes?.includes(profile?.uid) 
-                        ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20' 
-                        : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
-                    }`}
                   >
                     <Heart className={`w-5 h-5 ${expandedCelebration.likes?.includes(profile?.uid) ? 'fill-current' : ''}`} />
                     <span className="font-semibold">{expandedCelebration.likes?.length || 0} Likes</span>
-                  </button>
+                  </div>
                 </div>
               </div>
             </motion.div>

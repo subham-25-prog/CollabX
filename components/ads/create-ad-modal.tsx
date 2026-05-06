@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react"
 import { motion } from "framer-motion"
 import { X, Image as ImageIcon, Loader2, BadgePercent } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
+import { checkIsAdmin } from "@/lib/admin"
 import { createAd } from "@/lib/db"
 import { toast } from "sonner"
 import { compressImageToBase64 } from "@/lib/image-utils"
@@ -14,6 +15,14 @@ interface CreateAdModalProps {
 
 export function CreateAdModal({ onClose }: CreateAdModalProps) {
   const { profile } = useAuth()
+  const isAdmin = checkIsAdmin(profile)
+
+  React.useEffect(() => {
+    if (profile && !isAdmin) {
+      onClose()
+    }
+  }, [profile, isAdmin, onClose])
+
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [linkUrl, setLinkUrl] = useState("")

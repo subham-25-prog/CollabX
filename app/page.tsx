@@ -31,22 +31,37 @@ export default function LandingPage() {
             {/* Internal navigation links removed from landing page per user request */}
             
             <div className="flex items-center gap-4">
-              <Link 
-                href="/auth"
-                className="hidden sm:inline-block px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white transition-colors"
-              >
-                Log in
-              </Link>
-              <Link 
-                href="/auth"
-                className="relative group inline-flex items-center justify-center px-6 py-2.5 rounded-xl font-bold text-white transition-all duration-300"
-              >
-                <span className="absolute inset-0 w-full h-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 background-animate opacity-80 group-hover:opacity-100 shadow-[0_0_20px_rgba(99,102,241,0.5)] transition-all duration-300" />
-                <span className="absolute inset-[1px] rounded-[11px] bg-background/40 backdrop-blur-sm" />
-                <span className="relative flex items-center gap-2">
-                  Sign Up <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </Link>
+              {profile ? (
+                <Link 
+                  href="/feed"
+                  className="relative group inline-flex items-center justify-center px-6 py-2.5 rounded-xl font-bold text-white transition-all duration-300"
+                >
+                  <span className="absolute inset-0 w-full h-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 background-animate opacity-80 group-hover:opacity-100 shadow-[0_0_20px_rgba(99,102,241,0.5)] transition-all duration-300" />
+                  <span className="absolute inset-[1px] rounded-[11px] bg-background/40 backdrop-blur-sm" />
+                  <span className="relative flex items-center gap-2">
+                    Go to Feed <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Link>
+              ) : (
+                <>
+                  <Link 
+                    href="/auth"
+                    className="hidden sm:inline-block px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                  >
+                    Log in
+                  </Link>
+                  <Link 
+                    href="/auth"
+                    className="relative group inline-flex items-center justify-center px-6 py-2.5 rounded-xl font-bold text-white transition-all duration-300"
+                  >
+                    <span className="absolute inset-0 w-full h-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 background-animate opacity-80 group-hover:opacity-100 shadow-[0_0_20px_rgba(99,102,241,0.5)] transition-all duration-300" />
+                    <span className="absolute inset-[1px] rounded-[11px] bg-background/40 backdrop-blur-sm" />
+                    <span className="relative flex items-center gap-2">
+                      Sign Up <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -115,7 +130,7 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-5"
           >
             <Link 
-              href="/teams"
+              href={profile ? "/teams" : "/auth"}
               className="relative group w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-2xl font-bold text-white text-lg transition-all duration-300"
             >
               <span className="absolute inset-0 w-full h-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 opacity-90 group-hover:opacity-100 shadow-[0_0_40px_rgba(99,102,241,0.5)] group-hover:shadow-[0_0_60px_rgba(168,85,247,0.6)] transition-all duration-500" />
@@ -124,7 +139,7 @@ export default function LandingPage() {
               </span>
             </Link>
             <Link 
-              href="/feed"
+              href={profile ? "/feed" : "/auth"}
               className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold text-lg backdrop-blur-md transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.05)]"
             >
               Post Requirement <Plus className="w-5 h-5 ml-2" />
@@ -313,12 +328,12 @@ export default function LandingPage() {
           </p>
           
           <Link 
-            href="/auth"
+            href={profile ? "/feed" : "/auth"}
             className="relative group inline-flex items-center justify-center px-10 py-5 rounded-xl font-black text-white text-lg transition-all duration-300 hover:scale-105 z-10"
           >
             <span className="absolute inset-0 w-full h-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 opacity-100 shadow-[0_0_30px_rgba(99,102,241,0.4)] transition-all duration-300" />
             <span className="relative flex items-center gap-3">
-              Get Started for Free <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              {profile ? "Go to Feed" : "Get Started for Free"} <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
             </span>
           </Link>
         </motion.div>
@@ -379,9 +394,9 @@ export default function LandingPage() {
             <div>
               <h4 className="text-white font-bold mb-4">Platform</h4>
               <ul className="space-y-3 text-slate-400 text-sm">
-                <li><Link href="/feed" className="hover:text-indigo-400 transition-colors">Feed</Link></li>
-                <li><Link href="/teams" className="hover:text-indigo-400 transition-colors">Find Teams</Link></li>
-                <li><Link href="/chat" className="hover:text-indigo-400 transition-colors">Chat</Link></li>
+                <li><Link href={profile ? "/feed" : "/auth"} className="hover:text-indigo-400 transition-colors">Feed</Link></li>
+                <li><Link href={profile ? "/teams" : "/auth"} className="hover:text-indigo-400 transition-colors">Find Teams</Link></li>
+                <li><Link href={profile ? "/chat" : "/auth"} className="hover:text-indigo-400 transition-colors">Chat</Link></li>
               </ul>
             </div>
             

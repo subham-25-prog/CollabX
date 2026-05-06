@@ -3,9 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, Users, Plus, MessageCircle, User } from "lucide-react"
+import { Home, Users, Plus, MessageCircle, User, MessageSquarePlus, MessageSquareQuote } from "lucide-react"
 import { useState } from "react"
 import { CreatePostModal } from "@/components/feed/create-post-modal"
+import { FeedbackModal } from "@/components/feedback/feedback-modal"
+import { useAuth } from "@/components/auth/auth-provider"
+import { checkIsAdmin } from "@/lib/admin"
 
 const getNavItems = (unreadMessages: number) => [
   { icon: Home, label: "Feed", href: "/feed" },
@@ -19,14 +22,17 @@ import { useNotifications } from "@/hooks/use-notifications"
 
 export function MobileNav() {
   const pathname = usePathname()
+  const { profile } = useAuth()
   const { notifications } = useNotifications()
   const [showCreatePost, setShowCreatePost] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
   
-  // Count unread message notifications specifically
+  const isAdmin = checkIsAdmin(profile)
   const unreadMessages = notifications.filter(n => !n.read && n.type === 'message').length
   const navItems = getNavItems(unreadMessages)
 
   return (
+    <>
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border safe-area-pb">
       <div className="flex items-center justify-around px-2 py-2">
         {navItems.map((item) => {
@@ -79,5 +85,38 @@ export function MobileNav() {
         )}
       </AnimatePresence>
     </nav>
+
+    {/* Floating Feedback Button for Mobile */}
+    {!pathname.includes('/chat') && (
+      <div className="lg:hidden fixed bottom-20 right-4 z-40 flex flex-col gap-3">
+        {isAdmin ? (
+          <Link href="/admin/feedback">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-12 h-12 rounded-full glass-strong border border-primary/20 flex items-center justify-center text-primary shadow-lg"
+            >
+              <MessageSquareQuote className="w-6 h-6" />
+            </motion.div>
+          </Link>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowFeedback(true)}
+            className="w-12 h-12 rounded-full glass-strong border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-lg"
+          >
+            <MessageSquarePlus className="w-6 h-6" />
+          </motion.button>
+        )}
+      </div>
+    )}
+
+    <AnimatePresence>
+      {showFeedback && (
+        <FeedbackModal onClose={() => setShowFeedback(false)} />
+      )}
+    </AnimatePresence>
+    </>
   )
 }

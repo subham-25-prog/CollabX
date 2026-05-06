@@ -8,6 +8,9 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { createChat, toggleFollowUser } from "@/lib/db"
 import { useAuth } from "@/components/auth/auth-provider"
+import { checkIsAdmin, MASTER_ADMIN_EMAIL } from "@/lib/admin"
+import { Shield, ShieldAlert, ShieldCheck } from "lucide-react"
+import { toast } from "sonner"
 
 interface UserCardProps {
   user: {
@@ -19,6 +22,7 @@ interface UserCardProps {
     skills: string[]
     availability: string
     location: string
+    email?: string
   }
 }
 
@@ -28,12 +32,17 @@ const availabilityColors: Record<string, string> = {
   Busy: "bg-red-500/20 text-red-400 border-red-500/30",
 }
 
+import { Shield, ShieldAlert, ShieldCheck } from "lucide-react"
+import { toast } from "sonner"
+
 export function UserCard({ user }: UserCardProps) {
   const router = useRouter()
   const { profile: currentUser } = useAuth()
   const [isMessaging, setIsMessaging] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
   const isFollowing = ((currentUser as any)?.following || []).includes(user.uid)
+  const isMasterAdmin = currentUser?.email === MASTER_ADMIN_EMAIL
+  const targetIsAdmin = user.email === MASTER_ADMIN_EMAIL
 
   const handleFollow = async () => {
     if (!currentUser || !user.uid) return
@@ -101,9 +110,17 @@ export function UserCard({ user }: UserCardProps) {
             </span>
           </div>
           <p className="text-xs text-muted-foreground truncate">{user.role}</p>
-          <div className="hidden sm:flex items-center gap-1.5 mt-0.5">
-            <MapPin className="w-3 h-3 text-muted-foreground" />
-            <span className="text-[10px] text-muted-foreground">{user.location || "Earth"}</span>
+          <div className="flex items-center gap-2 mt-0.5">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3 h-3 text-muted-foreground" />
+              <span className="text-[10px] text-muted-foreground">{user.location || "Earth"}</span>
+            </div>
+            {targetIsAdmin && (
+              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 text-[8px] font-bold uppercase tracking-wider">
+                <ShieldCheck className="w-2.5 h-2.5" />
+                Admin
+              </div>
+            )}
           </div>
         </div>
 
@@ -180,16 +197,16 @@ export function UserCard({ user }: UserCardProps) {
               You
             </div>
           )}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleMessage}
-            disabled={isMessaging || currentUser?.uid === user.uid}
-            className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors disabled:opacity-50"
-          >
-            {isMessaging ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
-          </motion.button>
-        </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleMessage}
+              disabled={isMessaging || currentUser?.uid === user.uid}
+              className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors disabled:opacity-50"
+            >
+              {isMessaging ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+            </motion.button>
+          </div>
       </div>
     </motion.div>
   )

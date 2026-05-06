@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Image as ImageIcon, Sparkles, PartyPopper, Cake, Trophy, Loader2, Megaphone, Zap, BadgePercent } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
+import { checkIsAdmin } from "@/lib/admin"
 import { createCelebration } from "@/lib/db"
 import { toast } from "sonner"
 import { compressImageToBase64 } from "@/lib/image-utils"
@@ -21,6 +22,14 @@ const THEMES = [
 
 export function CreateCelebrationModal({ onClose }: CreateCelebrationModalProps) {
   const { profile } = useAuth()
+  const isAdmin = checkIsAdmin(profile)
+
+  React.useEffect(() => {
+    if (profile && !isAdmin) {
+      onClose()
+    }
+  }, [profile, isAdmin, onClose])
+
   const [content, setContent] = useState("")
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)

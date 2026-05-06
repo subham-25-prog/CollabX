@@ -14,6 +14,7 @@ import { collection, query, getDocs, limit, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { LogoIcon } from "@/components/ui/logo"
 import { InstallPWAButton } from "@/components/pwa/install-button"
+import { FeedbackModal } from "@/components/feedback/feedback-modal"
 
 interface NavbarProps {
   onCreatePost?: () => void
@@ -25,6 +26,7 @@ export function Navbar({ onCreatePost }: NavbarProps) {
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<{users: any[], posts: any[]}>({users: [], posts: []})
   const [showDropdown, setShowDropdown] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
 
   const { profile } = useAuth()
   const { notifications, unreadCount } = useNotifications()
@@ -156,7 +158,7 @@ export function Navbar({ onCreatePost }: NavbarProps) {
                     </div>
                   ) : searchResults.users.length === 0 && searchResults.posts.length === 0 ? (
                     <div className="py-8 text-center text-muted-foreground text-sm">
-                      No results found for "{searchQuery}"
+                      No results found for &quot;{searchQuery}&quot;
                     </div>
                   ) : (
                     <div className="overflow-y-auto custom-scrollbar p-2">
@@ -235,6 +237,28 @@ export function Navbar({ onCreatePost }: NavbarProps) {
             {profile?.role === 'Admin' && (
               <Link href="/admin/notifications" className="md:hidden p-2.5 rounded-xl hover:bg-secondary/50 transition-colors">
                 <ShieldCheck className="w-5 h-5 text-primary" />
+              </Link>
+            )}
+
+            {/* Feedback Button - Only for non-admins */}
+            {profile?.role?.toLowerCase() !== 'admin' && (
+              <button
+                onClick={() => setShowFeedback(true)}
+                className="p-2.5 rounded-xl hover:bg-secondary/50 transition-colors outline-none"
+                title="Give Feedback"
+              >
+                <MessageSquare className="w-5 h-5 text-muted-foreground hover:text-indigo-400 transition-colors" />
+              </button>
+            )}
+
+            {/* Admin Feedbacks Link for Mobile/Navbar */}
+            {profile?.role?.toLowerCase() === 'admin' && (
+              <Link 
+                href="/admin/feedback" 
+                className="p-2.5 rounded-xl hover:bg-secondary/50 transition-colors outline-none"
+                title="View Feedbacks"
+              >
+                <MessageSquare className="w-5 h-5 text-indigo-400" />
               </Link>
             )}
 
@@ -375,6 +399,12 @@ export function Navbar({ onCreatePost }: NavbarProps) {
           )}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {showFeedback && (
+          <FeedbackModal onClose={() => setShowFeedback(false)} />
+        )}
+      </AnimatePresence>
     </nav>
   )
 }

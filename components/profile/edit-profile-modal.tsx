@@ -96,6 +96,12 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
         updateData.coverImage = coverPreview
       }
 
+      if (role.toLowerCase().includes('admin')) {
+        toast.error("Unauthorized role: Admin")
+        setIsLoading(false)
+        return
+      }
+
       await updateUserProfile(profile.uid, updateData)
       toast.success("Profile updated successfully!")
       onClose()

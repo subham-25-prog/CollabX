@@ -124,19 +124,19 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
 
           <div className="flex items-center gap-2 sm:gap-4 ml-auto pt-12 sm:pt-24">
             {isOwnProfile && (
-              <>
+              <div className="hidden sm:flex items-center gap-4">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-semibold transition-colors text-sm sm:text-base border border-border"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-semibold transition-colors text-base border border-border"
                   onClick={() => setShowEditModal(true)}
                 >
                   Edit Profile
                 </motion.button>
-                <Link href="/settings" className="p-1.5 sm:p-2 rounded-xl bg-transparent hover:bg-secondary text-foreground transition-colors">
-                  <Settings className="w-6 h-6 sm:w-6 sm:h-6" />
+                <Link href="/settings" className="p-2 rounded-xl bg-transparent hover:bg-secondary text-foreground transition-colors">
+                  <Settings className="w-6 h-6" />
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -222,12 +222,12 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
               </motion.div>
             </div>
 
-            {/* Action buttons */}
+            {/* Action buttons Desktop */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
-              className="flex items-center gap-3 mt-6 sm:mt-0"
+              className="hidden sm:flex items-center gap-3 mt-6 sm:mt-0"
             >
               {!isOwnProfile && (
                 <>
@@ -270,6 +270,56 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
           </div>
           </div>
         </div>
+
+      {/* Floating Action Buttons for Mobile */}
+      <div className="sm:hidden fixed bottom-36 right-4 z-40 flex flex-col gap-3">
+        {isOwnProfile ? (
+          <>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowEditModal(true)}
+              className="w-12 h-12 rounded-full gradient-primary text-white flex items-center justify-center shadow-lg shadow-primary/30"
+              title="Edit Profile"
+            >
+              <Edit3 className="w-6 h-6" />
+            </motion.button>
+            <Link href="/settings">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-12 h-12 rounded-full glass-strong border border-border flex items-center justify-center text-foreground shadow-lg"
+              >
+                <Settings className="w-6 h-6" />
+              </motion.div>
+            </Link>
+          </>
+        ) : (
+          <>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleMessage}
+              disabled={isMessaging}
+              className="w-12 h-12 rounded-full gradient-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 disabled:opacity-50"
+            >
+              <MessageCircle className="w-6 h-6" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleFollow}
+              disabled={isFollowLoading}
+              className={`w-12 h-12 rounded-full glass-strong border flex items-center justify-center shadow-lg disabled:opacity-50 ${
+                isFollowing ? "text-primary border-primary/30" : "text-foreground border-border"
+              }`}
+            >
+              <UserPlus className="w-6 h-6" />
+            </motion.button>
+          </>
+        )}
+      </div>
+
       <AnimatePresence>
         {showEditModal && (
           <EditProfileModal profile={profile} onClose={() => setShowEditModal(false)} />
