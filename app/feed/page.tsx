@@ -34,7 +34,6 @@ function FeedContent() {
   const postParam = searchParams.get("post")
   const [showCreatePost, setShowCreatePost] = useState(false)
   const [posts, setPosts] = useState<any[]>([])
-  const [newPosts, setNewPosts] = useState<any[]>([])
   const [pinnedPosts, setPinnedPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
@@ -43,7 +42,7 @@ function FeedContent() {
   const [pageLoadTime, setPageLoadTime] = useState<Date | null>(null)
   
   // Find post if postParam exists
-  const selectedPost = postParam ? posts.find(p => p.id === postParam) || newPosts.find(p => p.id === postParam) : null
+  const selectedPost = postParam ? posts.find(p => p.id === postParam) : null
 
   useEffect(() => {
     if (!isAuthLoading && profile && profile.onboardingCompleted === false) {
@@ -74,9 +73,9 @@ function FeedContent() {
   const calculateRelevanceScore = React.useCallback((post: any, userProfile: any) => {
     let score = 0;
     
-    // 1. Followed Author Boost
+    // 1. Followed Author Boost (Strongest signal)
     if (userProfile?.following?.includes(post.author?.id)) {
-      score += 50;
+      score += 100;
     }
     
     // 2. Shared Interests/Skills
@@ -126,9 +125,9 @@ function FeedContent() {
     else setIsLoading(true);
 
     try {
-      let q = query(collection(db, "posts"), orderBy("timestamp", "desc"), limit(20));
+      let q = query(collection(db, "posts"), orderBy("timestamp", "desc"), limit(40));
       if (isLoadMore && lastVisible) {
-        q = query(collection(db, "posts"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(20));
+        q = query(collection(db, "posts"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(40));
       }
 
       const snapshot = await getDocs(q);
@@ -156,7 +155,7 @@ function FeedContent() {
       if (snapshot.docs.length > 0) {
         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
       }
-      setHasMore(snapshot.docs.length === 20);
+      setHasMore(snapshot.docs.length === 40);
     } catch (error) {
       console.error("Failed to fetch posts", error);
     } finally {
@@ -171,9 +170,9 @@ function FeedContent() {
     }
   }, [profile, pageLoadTime, calculateRelevanceScore]);
 
-  // Listen for NEW posts globally without crashing the feed
+  // Listen for NEW posts globally and integrate them automatically
   useEffect(() => {
-    if (!pageLoadTime) return;
+    if (!pageLoadTime || !profile) return;
 
     const q = query(
       collection(db, "posts"), 
@@ -184,40 +183,40 @@ function FeedContent() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const newIncoming: any[] = [];
       snapshot.docChanges().forEach((change) => {
-        // Only track newly created documents, ignore likes/comments on existing ones
         if (change.type === "added") {
-          newIncoming.push({ id: change.doc.id, ...change.doc.data() });
+          const post = { id: change.doc.id, ...change.doc.data() };
+          newIncoming.push({
+            ...post,
+            _score: calculateRelevanceScore(post, profile)
+          });
         }
       });
 
       if (newIncoming.length > 0) {
-        setNewPosts(prev => {
+        setPosts(prev => {
+          // Score new posts relative to current time
           const combined = [...newIncoming, ...prev];
           // Remove duplicates
-          const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+          const uniqueMap = new Map();
+          combined.forEach(p => {
+            if (!uniqueMap.has(p.id)) {
+              uniqueMap.set(p.id, p);
+            }
+          });
+          
+          const unique = Array.from(uniqueMap.values());
+          // Sort the top portion if needed, but for "Live" we mostly just prepend
+          // since they are all very recent.
           return unique;
         });
       }
     });
 
     return () => unsubscribe();
-  }, [pageLoadTime]);
-
-  const handleShowNewPosts = () => {
-    const scoredNew = newPosts.map(post => ({
-      ...post,
-      _score: calculateRelevanceScore(post, profile)
-    }));
-    scoredNew.sort((a, b) => b._score - a._score);
-
-    setPosts(prev => [...scoredNew, ...prev]);
-    setNewPosts([]);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [pageLoadTime, profile, calculateRelevanceScore]);
 
   const handleDeletePost = (postId: string) => {
     setPosts(prev => prev.filter(p => p.id !== postId));
-    setNewPosts(prev => prev.filter(p => p.id !== postId));
     setPinnedPosts(prev => prev.filter(p => p.id !== postId));
   };
 
@@ -271,24 +270,7 @@ function FeedContent() {
               </div>
             </motion.div>
 
-            {/* New Posts Indicator */}
-            <AnimatePresence>
-              {newPosts.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="sticky top-20 z-30 flex justify-center mb-6"
-                >
-                  <button
-                    onClick={handleShowNewPosts}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/30 hover:scale-105 active:scale-95 transition-all"
-                  >
-                    ↑ {newPosts.length} New Post{newPosts.length > 1 ? 's' : ''}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* New posts now integrate automatically without a popup indicator */}
 
             {/* Posts feed */}
             {isLoading ? (
