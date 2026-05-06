@@ -397,7 +397,7 @@ export default function LandingPage() {
           
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-slate-500 text-sm">
-              © {new Date().getFullYear()} CollabX. Built with ❤️ by Shubhamoy Karmakar.
+              © {new Date().getFullYear()} CollabX. Built with ❤️ by Shubhamoy.
             </p>
             <div className="flex items-center gap-4 text-slate-500">
               {/* Social icons placeholders */}
