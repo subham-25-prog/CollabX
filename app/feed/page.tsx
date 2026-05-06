@@ -40,7 +40,6 @@ function FeedContent() {
   const [lastVisible, setLastVisible] = useState<any>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [pageLoadTime, setPageLoadTime] = useState<Date | null>(null)
-  const [newPosts, setNewPosts] = useState<any[]>([])
   
   // Find post if postParam exists
   const selectedPost = postParam ? posts.find(p => p.id === postParam) : null
@@ -194,11 +193,13 @@ function FeedContent() {
       });
 
       if (newIncoming.length > 0) {
-        setNewPosts(prev => {
-          const combined = [...newIncoming, ...prev];
-          const uniqueMap = new Map();
-          combined.forEach(p => uniqueMap.set(p.id, p));
-          return Array.from(uniqueMap.values());
+        setPosts(prev => {
+          // Prepend new posts to the top (Instagram-style)
+          // The browser's scroll anchoring will prevent the view from jumping
+          const uniqueNew = newIncoming.filter(newP => !prev.some(p => p.id === newP.id));
+          if (uniqueNew.length === 0) return prev;
+          
+          return [...uniqueNew, ...prev];
         });
       }
     });
@@ -260,35 +261,6 @@ function FeedContent() {
                 </button>
               </div>
             </motion.div>
-
-            {/* New Posts Indicator */}
-            <AnimatePresence>
-              {newPosts.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="flex justify-center sticky top-20 z-30 mb-4"
-                >
-                  <button
-                    onClick={() => {
-                      setPosts(prev => {
-                        const combined = [...newPosts, ...prev];
-                        const uniqueMap = new Map();
-                        combined.forEach(p => uniqueMap.set(p.id, p));
-                        return Array.from(uniqueMap.values());
-                      });
-                      setNewPosts([]);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full gradient-primary text-primary-foreground text-sm font-bold shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    See {newPosts.length} new post{newPosts.length > 1 ? 's' : ''}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             {/* Posts feed */}
             {isLoading ? (
