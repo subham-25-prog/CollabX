@@ -347,6 +347,7 @@ function FeedContent() {
                   </div>
                 )}
               </div>
+            )}
             </div>
 
             {/* Right Sidebar - Desktop Only */}
