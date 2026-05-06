@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { MapPin, Calendar, Link as LinkIcon, MessageCircle, UserPlus, Edit3, Settings, ArrowLeft } from "lucide-react"
+import { MapPin, Calendar, Link as LinkIcon, MessageCircle, UserPlus, Edit3, Settings, ArrowLeft, GraduationCap, Building2, BookOpen } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -153,7 +153,7 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 }}
-                className="flex flex-wrap items-center gap-4 mt-4 text-sm text-muted-foreground"
+                className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground"
               >
                 <span className="flex items-center gap-1.5">
                   <MapPin className="w-4 h-4" />
@@ -169,6 +169,35 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
                   {profile.role || "Student"}
                 </span>
               </motion.div>
+
+              {/* Academic Info */}
+              {(profile.college || profile.dept || profile.year) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.35 }}
+                  className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-sm text-foreground/80"
+                >
+                  {profile.college && (
+                    <span className="flex items-center gap-1.5 bg-secondary/30 px-3 py-1 rounded-lg border border-border/50">
+                      <Building2 className="w-4 h-4 text-primary" />
+                      {profile.college}
+                    </span>
+                  )}
+                  {profile.dept && (
+                    <span className="flex items-center gap-1.5 bg-secondary/30 px-3 py-1 rounded-lg border border-border/50">
+                      <BookOpen className="w-4 h-4 text-primary" />
+                      {profile.dept}
+                    </span>
+                  )}
+                  {profile.year && (
+                    <span className="flex items-center gap-1.5 bg-secondary/30 px-3 py-1 rounded-lg border border-border/50">
+                      <GraduationCap className="w-4 h-4 text-primary" />
+                      {profile.year}
+                    </span>
+                  )}
+                </motion.div>
+              )}
 
               {/* Skills */}
               <motion.div

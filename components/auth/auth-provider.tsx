@@ -22,6 +22,9 @@ interface UserProfile {
   projects?: any[]
   following?: string[]
   followers?: string[]
+  college?: string
+  year?: string
+  dept?: string
   onboardingCompleted?: boolean
 }
 

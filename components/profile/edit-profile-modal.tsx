@@ -20,6 +20,10 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
   const [skills, setSkills] = useState<string[]>(profile.skills || [])
   const [currentSkill, setCurrentSkill] = useState("")
   
+  const [college, setCollege] = useState(profile.college || "")
+  const [year, setYear] = useState(profile.year || "")
+  const [dept, setDept] = useState(profile.dept || "")
+  
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile.avatar || null)
   const [coverPreview, setCoverPreview] = useState<string | null>(profile.coverImage || null)
   
@@ -86,7 +90,10 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
         role,
         bio,
         location,
-        skills: finalSkills
+        skills: finalSkills,
+        college,
+        year,
+        dept
       }
       
       if (avatarPreview && avatarPreview.startsWith('data:image')) {
@@ -253,6 +260,48 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
                 placeholder="Tell us about yourself..."
                 className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base resize-none"
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">College Name</label>
+                <input
+                  type="text"
+                  value={college}
+                  onChange={(e) => setCollege(e.target.value)}
+                  placeholder="e.g. Stanford University"
+                  className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Department / Stream</label>
+                <input
+                  type="text"
+                  value={dept}
+                  onChange={(e) => setDept(e.target.value)}
+                  placeholder="e.g. Computer Science"
+                  className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Year of Study</label>
+              <select
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
+              >
+                <option value="" disabled className="bg-background">Select Year</option>
+                <option value="1st Year" className="bg-background">1st Year</option>
+                <option value="2nd Year" className="bg-background">2nd Year</option>
+                <option value="3rd Year" className="bg-background">3rd Year</option>
+                <option value="4th Year" className="bg-background">4th Year</option>
+                <option value="Master's" className="bg-background">Master's</option>
+                <option value="PhD" className="bg-background">PhD</option>
+                <option value="Graduate" className="bg-background">Graduate</option>
+              </select>
             </div>
 
             <div className="space-y-2">
