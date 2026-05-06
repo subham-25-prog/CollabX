@@ -240,28 +240,6 @@ export function Navbar({ onCreatePost }: NavbarProps) {
               </Link>
             )}
 
-            {/* Feedback Button - Only for non-admins */}
-            {profile?.role?.toLowerCase() !== 'admin' && (
-              <button
-                onClick={() => setShowFeedback(true)}
-                className="p-2.5 rounded-xl hover:bg-secondary/50 transition-colors outline-none"
-                title="Give Feedback"
-              >
-                <MessageSquare className="w-5 h-5 text-muted-foreground hover:text-indigo-400 transition-colors" />
-              </button>
-            )}
-
-            {/* Admin Feedbacks Link for Mobile/Navbar */}
-            {profile?.role?.toLowerCase() === 'admin' && (
-              <Link 
-                href="/admin/feedback" 
-                className="p-2.5 rounded-xl hover:bg-secondary/50 transition-colors outline-none"
-                title="View Feedbacks"
-              >
-                <MessageSquare className="w-5 h-5 text-indigo-400" />
-              </Link>
-            )}
-
             {/* Notifications */}
             <Link href="/notifications" className="relative p-2.5 rounded-xl hover:bg-secondary/50 transition-colors outline-none block">
               <Bell className="w-5 h-5 text-muted-foreground" />

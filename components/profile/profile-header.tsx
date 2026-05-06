@@ -83,16 +83,8 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
   return (
     <>
     <div className="relative">
-      {/* Back Button */}
-      <button 
-        onClick={() => router.back()}
-        className="absolute top-4 left-4 z-10 p-2 bg-background/50 backdrop-blur-md rounded-full text-foreground hover:bg-background/80 transition-colors shadow-sm"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
-
       {/* Cover Image */}
-      <div className="h-24 sm:h-64 relative overflow-hidden bg-secondary group">
+      <div className="h-32 sm:h-64 relative overflow-hidden bg-secondary group">
         <Image
           src={getCoverImage()}
           alt="Cover"
@@ -103,38 +95,33 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
       </div>
 
       <div className="max-w-4xl mx-auto px-4">
-        <div className="relative -mt-12 sm:-mt-24 flex items-center justify-between gap-4">
-          {/* Profile Image */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
-            className="relative inline-block group"
-          >
-            <Image
-              src={getAvatarImage()}
-              alt={profile.name}
-              width={160}
-              height={160}
-              unoptimized
-              className="w-24 h-24 sm:w-40 sm:h-40 rounded-full sm:rounded-2xl object-cover border-4 border-background shadow-xl bg-background"
-            />
-            <span className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-4 border-background" />
-          </motion.div>
+        <div className="relative flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-12 sm:-mt-20">
+          <div className="flex items-end gap-4">
+            {/* Profile Image */}
+            <div className="relative inline-block">
+              <Image
+                src={getAvatarImage()}
+                alt={profile.name}
+                width={160}
+                height={160}
+                unoptimized
+                className="w-24 h-24 sm:w-40 sm:h-40 rounded-full sm:rounded-2xl object-cover border-4 border-background shadow-xl bg-background"
+              />
+              <span className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-4 border-background" />
+            </div>
+          </div>
 
-          <div className="flex items-center gap-2 sm:gap-4 ml-auto pt-12 sm:pt-24">
+          <div className="flex items-center gap-2 mb-2">
             {isOwnProfile && (
               <>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2.5 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-semibold transition-colors text-sm sm:text-base border border-border"
+                <button
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-secondary-foreground font-semibold transition-colors text-sm border border-border"
                   onClick={() => setShowEditModal(true)}
                 >
                   Edit Profile
-                </motion.button>
-                <Link href="/settings" className="p-1.5 sm:p-2 rounded-xl bg-transparent hover:bg-secondary text-foreground transition-colors">
-                  <Settings className="w-6 h-6 sm:w-6 sm:h-6" />
+                </button>
+                <Link href="/settings" className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground transition-colors border border-border">
+                  <Settings className="w-5 h-5" />
                 </Link>
               </>
             )}

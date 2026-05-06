@@ -86,8 +86,8 @@ export function MobileNav() {
       </AnimatePresence>
     </nav>
 
-    {/* Floating Feedback Button for Mobile */}
-    {!pathname.includes('/chat') && (
+    {/* Floating Feedback Button for Mobile - Only in Feed */}
+    {(pathname === '/feed' || pathname === '/') && (
       <div className="lg:hidden fixed bottom-20 right-4 z-40 flex flex-col gap-3">
         {isAdmin ? (
           <Link href="/admin/feedback">
