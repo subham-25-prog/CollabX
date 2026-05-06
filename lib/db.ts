@@ -544,3 +544,19 @@ export async function toggleLikeCelebration(celebrationId: string, userId: strin
 export async function deleteCelebration(celebrationId: string) {
   return await deleteDoc(doc(db, "celebrations", celebrationId))
 }
+
+// ADS
+export async function createAd(author: { id: string, name: string, avatar: string }, title: string, description: string, imageUrl: string, linkUrl: string) {
+  return await addDoc(collection(db, "ads"), {
+    author,
+    title,
+    description,
+    imageUrl,
+    linkUrl,
+    timestamp: serverTimestamp()
+  })
+}
+
+export async function deleteAd(adId: string) {
+  return await deleteDoc(doc(db, "ads", adId))
+}
