@@ -11,7 +11,6 @@ import { motion, AnimatePresence } from "framer-motion"
 const CreatePostModal = dynamic(() => import("@/components/feed/create-post-modal").then(mod => mod.CreatePostModal), { ssr: false })
 const PostCommentsModal = dynamic(() => import("@/components/feed/post-comments-modal").then(mod => mod.PostCommentsModal), { ssr: false })
 const CelebrationsWidget = dynamic(() => import("@/components/celebrations/celebrations-widget").then(mod => mod.CelebrationsWidget), { ssr: false })
-const AdWidget = dynamic(() => import("@/components/ads/ad-widget").then(mod => mod.AdWidget), { ssr: false })
 import { collection, query, orderBy, onSnapshot, doc, setDoc, addDoc, serverTimestamp, limit, getDocs, startAfter, where } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Loader2, Image, Smile, BarChart2 } from "lucide-react"
@@ -355,7 +354,26 @@ function FeedContent() {
             <div className="hidden xl:block w-80 shrink-0 space-y-6 sticky top-24 self-start">
               <CelebrationsWidget />
               
-              <AdWidget />
+              <div className="glass rounded-2xl p-4 border border-border/50 relative overflow-hidden group">
+                <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider z-10">
+                  Ad
+                </div>
+                <div className="overflow-hidden rounded-xl mb-3 h-32 relative">
+                  <img 
+                    src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=500&h=300&fit=crop" 
+                    alt="Advertisement" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground mb-1">Boost Your Coding Skills</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                  Join the ultimate bootcamp and become a full-stack developer in 12 weeks. Learn React, Node, and more!
+                </p>
+                <a href="#" className="block text-center w-full py-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-xl transition-colors">
+                  Learn More
+                </a>
+              </div>
 
               <div className="px-4 text-[11px] text-muted-foreground space-y-2">
                 <div className="flex flex-wrap gap-2">
