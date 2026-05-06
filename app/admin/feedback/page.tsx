@@ -25,6 +25,7 @@ import { formatDistanceToNow } from "date-fns"
 import { toast } from "sonner"
 import { useAuth } from "@/components/auth/auth-provider"
 import { useRouter } from "next/navigation"
+import { checkIsAdmin } from "@/lib/admin"
 
 interface Feedback {
   id: string
@@ -52,7 +53,7 @@ export default function AdminFeedbackPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    if (profile && profile.role?.toLowerCase() !== 'admin') {
+    if (profile && !checkIsAdmin(profile)) {
       router.push('/feed')
       return
     }
