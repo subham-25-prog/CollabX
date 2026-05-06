@@ -50,6 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsLoading(true)
+      
+      // CRITICAL: Clear current profile immediately to prevent session bleeding
+      setProfile(null)
       setUser(firebaseUser)
 
       // Clean up previous profile listener if it exists

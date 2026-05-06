@@ -10,6 +10,9 @@ import { useNotifications } from "@/hooks/use-notifications"
 import { InstallPWAButton } from "@/components/pwa/install-button"
 import { FeedbackModal } from "@/components/feedback/feedback-modal"
 import { useState } from "react"
+import { auth } from "@/lib/firebase"
+import { signOut } from "firebase/auth"
+import { useRouter } from "next/navigation"
 
 const navItems: { icon: any; label: string; href: string; badge?: number }[] = [
   { icon: Home, label: "Home Feed", href: "/feed" },
@@ -25,9 +28,19 @@ const bottomItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { profile } = useAuth()
   const { unreadCount, notifications } = useNotifications()
   const [showFeedback, setShowFeedback] = useState(false)
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth)
+      router.push("/auth")
+    } catch (error) {
+      console.error("Failed to sign out:", error)
+    }
+  }
 
   const getAvatarImage = () => {
     const p = profile as any;
@@ -98,17 +111,13 @@ export function Sidebar() {
       {/* Bottom navigation */}
       <div className="p-4 border-t border-border space-y-1">
 
-        {bottomItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <motion.div
-              whileHover={{ x: 4 }}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200"
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
-            </motion.div>
-          </Link>
-        ))}
+        <button
+          onClick={handleSignOut}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-all duration-200 w-full text-left"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="font-medium">Sign Out</span>
+        </button>
         <InstallPWAButton />
       </div>
 
