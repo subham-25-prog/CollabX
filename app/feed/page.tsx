@@ -287,31 +287,24 @@ function FeedContent() {
 
                 {/* Render Normal Posts (Exclude Pinned) */}
                 {posts.filter(p => !pinnedPosts.some(pinned => pinned.id === p.id)).map((post, index) => {
-                  const filteredPosts = posts.filter(p => !pinnedPosts.some(pinned => pinned.id === p.id));
-                  if (filteredPosts.length === index + 1) {
-                    return (
-                      <motion.div
-                        ref={lastPostElementRef}
-                        key={post.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: index * 0.1 }}
-                      >
-                        <PostCard post={post as any} onDelete={handleDeletePost} />
-                      </motion.div>
-                    )
-                  } else {
-                    return (
-                      <motion.div
-                        key={post.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: index * 0.1 }}
-                      >
-                        <PostCard post={post as any} onDelete={handleDeletePost} />
-                      </motion.div>
-                    )
-                  }
+                  const isFirstChunk = index < 10; // Only animate the first few for performance
+                  return (
+                    <motion.div
+                      key={post.id}
+                      layout // This prevents the glitching/snapping
+                      initial={isFirstChunk ? { opacity: 0, y: 10 } : false}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ 
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 30,
+                        opacity: { duration: 0.2 }
+                      }}
+                      ref={index === posts.length - 1 ? lastPostElementRef : null}
+                    >
+                      <PostCard post={post as any} onDelete={handleDeletePost} />
+                    </motion.div>
+                  )
                 })}
                 
                 {isLoadingMore && (
