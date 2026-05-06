@@ -60,8 +60,13 @@ export function CelebrationsWidget() {
     }
   }
 
+  const isAdmin = profile?.role === 'admin' || profile?.email === 'shubhamoy27@gmail.com'
+
   const handleDelete = async (id: string) => {
-    if (!profile || profile.role !== 'admin') return
+    // Check if user is admin or the author
+    const currentCelebration = celebrations.find(c => c.id === id)
+    if (!profile || (!isAdmin && currentCelebration?.author?.id !== profile.uid)) return
+
     if (confirm("Are you sure you want to delete this celebration?")) {
       try {
         await deleteCelebration(id)
@@ -80,7 +85,7 @@ export function CelebrationsWidget() {
           <Sparkles className="w-4 h-4 text-primary" />
           The Billboard
         </h3>
-        {profile?.role === 'admin' && (
+        {profile && (
           <button 
             onClick={() => setShowModal(true)}
             className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
@@ -120,7 +125,7 @@ export function CelebrationsWidget() {
                       {THEME_MAP[celebrations[currentIndex].type]?.label || 'Celebration'}
                     </span>
                   </div>
-                  {profile?.role === 'admin' && (
+                  {(isAdmin || profile?.uid === celebrations[currentIndex].author.id) && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
@@ -176,7 +181,7 @@ export function CelebrationsWidget() {
                 <p className="text-sm font-medium text-foreground">No wishes yet</p>
                 <p className="text-xs text-muted-foreground mt-1">Be the first to celebrate someone!</p>
               </div>
-              {profile?.role === 'admin' && (
+              {profile && (
                 <button 
                   onClick={() => setShowModal(true)}
                   className="text-xs font-bold text-primary hover:underline"
