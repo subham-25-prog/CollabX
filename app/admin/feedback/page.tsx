@@ -219,7 +219,17 @@ export default function AdminFeedbackPage() {
                     {/* Right: Actions */}
                     <div className="flex sm:flex-col gap-2 justify-end sm:justify-start">
                       <button
-                        onClick={() => handleStatusUpdate(f.id, f.status === 'reviewed' ? 'pending' : 'reviewed')}
+                        onClick={async () => {
+                          const newStatus = f.status === 'reviewed' ? 'pending' : 'reviewed';
+                          try {
+                            await updateDoc(doc(db, "feedback", f.id), { status: newStatus });
+                            setFeedbacks(prev => prev.map(item => item.id === f.id ? { ...item, status: newStatus } : item));
+                            toast.success(`Feedback marked as ${newStatus}`);
+                          } catch (error) {
+                            console.error("Status update error:", error);
+                            toast.error("Failed to update status. Check permissions.");
+                          }
+                        }}
                         className={`p-3 rounded-xl transition-all ${
                           f.status === 'reviewed' 
                             ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' 
