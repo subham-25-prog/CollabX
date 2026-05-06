@@ -4,9 +4,9 @@ import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { collection, query, orderBy, limit, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
-import { Cake, Trophy, PartyPopper, Sparkles, ChevronLeft, ChevronRight, Plus, Heart } from "lucide-react"
+import { Cake, Trophy, PartyPopper, Sparkles, ChevronLeft, ChevronRight, Plus, Heart, Trash2, X } from "lucide-react"
 import { CreateCelebrationModal } from "./create-celebration-modal"
-import { toggleLikeCelebration } from "@/lib/db"
+import { toggleLikeCelebration, deleteCelebration } from "@/lib/db"
 import { useAuth } from "@/components/auth/auth-provider"
 
 const THEME_MAP: any = {
@@ -22,6 +22,7 @@ export function CelebrationsWidget() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showModal, setShowModal] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [expandedCelebration, setExpandedCelebration] = useState<any>(null)
 
   useEffect(() => {
     const q = query(
@@ -33,6 +34,7 @@ export function CelebrationsWidget() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       setCelebrations(data)
+      setCurrentIndex(prev => data.length === 0 ? 0 : Math.min(prev, data.length - 1))
       setIsLoading(false)
     })
 
@@ -58,6 +60,17 @@ export function CelebrationsWidget() {
     }
   }
 
+  const handleDelete = async (id: string) => {
+    if (!profile || profile.role !== 'admin') return
+    if (confirm("Are you sure you want to delete this celebration?")) {
+      try {
+        await deleteCelebration(id)
+      } catch (error) {
+        console.error("Failed to delete", error)
+      }
+    }
+  }
+
   if (isLoading) return null
 
   return (
@@ -67,13 +80,15 @@ export function CelebrationsWidget() {
           <Sparkles className="w-4 h-4 text-primary" />
           The Billboard
         </h3>
-        <button 
-          onClick={() => setShowModal(true)}
-          className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-          title="Post a wish"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
+        {profile?.role === 'admin' && (
+          <button 
+            onClick={() => setShowModal(true)}
+            className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+            title="Post a wish"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <div className="relative group">
@@ -90,13 +105,14 @@ export function CelebrationsWidget() {
                 <img 
                   src={celebrations[currentIndex].imageUrl} 
                   alt="Celebration" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover cursor-pointer"
+                  onClick={() => setExpandedCelebration(celebrations[currentIndex])}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
                 
-                {/* Theme Badge */}
-                <div className="absolute top-3 left-3">
-                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md bg-black/40 border border-white/10 shadow-lg`}>
+                {/* Theme Badge and Controls */}
+                <div className="absolute top-3 left-3 right-3 flex justify-between items-start pointer-events-none">
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md bg-black/40 border border-white/10 shadow-lg pointer-events-auto`}>
                     {React.createElement(THEME_MAP[celebrations[currentIndex].type]?.icon || Sparkles, {
                       className: `w-3.5 h-3.5 ${THEME_MAP[celebrations[currentIndex].type]?.color || 'text-primary'}`
                     })}
@@ -104,6 +120,18 @@ export function CelebrationsWidget() {
                       {THEME_MAP[celebrations[currentIndex].type]?.label || 'Celebration'}
                     </span>
                   </div>
+                  {profile?.role === 'admin' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDelete(celebrations[currentIndex].id)
+                      }}
+                      className="p-2 rounded-full bg-black/40 text-red-500 hover:bg-red-500 hover:text-white transition-colors backdrop-blur-md border border-white/10 pointer-events-auto"
+                      title="Delete celebration"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -148,12 +176,14 @@ export function CelebrationsWidget() {
                 <p className="text-sm font-medium text-foreground">No wishes yet</p>
                 <p className="text-xs text-muted-foreground mt-1">Be the first to celebrate someone!</p>
               </div>
-              <button 
-                onClick={() => setShowModal(true)}
-                className="text-xs font-bold text-primary hover:underline"
-              >
-                + Post a wish
-              </button>
+              {profile?.role === 'admin' && (
+                <button 
+                  onClick={() => setShowModal(true)}
+                  className="text-xs font-bold text-primary hover:underline"
+                >
+                  + Post a wish
+                </button>
+              )}
             </div>
           )}
         </AnimatePresence>
@@ -173,6 +203,83 @@ export function CelebrationsWidget() {
       <AnimatePresence>
         {showModal && (
           <CreateCelebrationModal onClose={() => setShowModal(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {expandedCelebration && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setExpandedCelebration(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-4xl w-full max-h-[90vh] flex flex-col md:flex-row bg-background rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+            >
+              <button
+                onClick={() => setExpandedCelebration(null)}
+                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-white/20 backdrop-blur-md transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="flex-1 bg-black min-h-[40vh] md:min-h-[auto] flex items-center justify-center relative">
+                <img 
+                  src={expandedCelebration.imageUrl} 
+                  alt="Celebration" 
+                  className="max-w-full max-h-[60vh] md:max-h-[90vh] object-contain"
+                />
+              </div>
+              
+              <div className="w-full md:w-96 p-6 flex flex-col gap-6 bg-card border-l border-white/5">
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={expandedCelebration.author.avatar} 
+                    alt="" 
+                    className="w-10 h-10 rounded-full border border-primary/20"
+                  />
+                  <div>
+                    <p className="font-semibold text-sm">{expandedCelebration.author.name}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{THEME_MAP[expandedCelebration.type]?.label || 'Celebration'}</p>
+                  </div>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto">
+                  <p className="text-sm md:text-base leading-relaxed text-foreground/90 whitespace-pre-wrap">
+                    {expandedCelebration.content}
+                  </p>
+                </div>
+                
+                <div className="pt-4 border-t border-border">
+                  <button 
+                    onClick={() => {
+                      handleLike(expandedCelebration.id, expandedCelebration.likes?.includes(profile?.uid))
+                      setExpandedCelebration({
+                        ...expandedCelebration,
+                        likes: expandedCelebration.likes?.includes(profile?.uid)
+                          ? expandedCelebration.likes.filter((id: string) => id !== profile?.uid)
+                          : [...(expandedCelebration.likes || []), profile?.uid]
+                      })
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all w-full justify-center ${
+                      expandedCelebration.likes?.includes(profile?.uid) 
+                        ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20' 
+                        : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
+                    }`}
+                  >
+                    <Heart className={`w-5 h-5 ${expandedCelebration.likes?.includes(profile?.uid) ? 'fill-current' : ''}`} />
+                    <span className="font-semibold">{expandedCelebration.likes?.length || 0} Likes</span>
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
