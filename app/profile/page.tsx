@@ -79,7 +79,7 @@ function ProfileContent() {
       unsubPosts()
       unsubTeams()
     }
-  }, [profileId, currentUser, authLoading])
+  }, [profileId, currentUser?.uid, authLoading])
 
   if (isLoading || authLoading) {
     return (

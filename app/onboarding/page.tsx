@@ -46,7 +46,15 @@ export default function OnboardingPage() {
     }
   }, [user, profile, isLoading, router])
 
-  if (isLoading || !user || profile?.onboardingCompleted) {
+  if (isLoading || !user || (profile === null && isLoading)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    )
+  }
+
+  if (profile?.onboardingCompleted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />

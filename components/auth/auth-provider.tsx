@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, useMemo, useRef } from "react"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, arrayUnion } from "firebase/firestore"
@@ -47,14 +47,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const userRef = useRef<string | null>(null)
 
   useEffect(() => {
     let unsubscribeProfile: (() => void) | null = null
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Only reset everything if the user actually changed
+      if (firebaseUser?.uid === userRef.current && profile) {
+        setIsLoading(false)
+        return
+      }
+      
+      userRef.current = firebaseUser?.uid || null
       setIsLoading(true)
       
-      // CRITICAL: Clear current profile immediately to prevent session bleeding
+      // Clear current profile only on user change to prevent session bleeding
       setProfile(null)
       setUser(firebaseUser)
 
@@ -65,10 +73,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (firebaseUser) {
-        const userRef = doc(db, "users", firebaseUser.uid)
+        const uRef = doc(db, "users", firebaseUser.uid)
         
         try {
-          const docSnap = await getDoc(userRef)
+          const docSnap = await getDoc(uRef)
           
           if (docSnap.exists()) {
             setProfile(docSnap.data() as UserProfile)
@@ -85,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               location: "Earth",
               onboardingCompleted: false,
             }
-            await setDoc(userRef, newProfile)
+            await setDoc(uRef, newProfile)
             setProfile(newProfile)
           }
         } catch (error) {
@@ -95,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Setup real-time listener for profile updates
-        unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
+        unsubscribeProfile = onSnapshot(uRef, (docSnap) => {
           if (docSnap.exists()) {
             setProfile(docSnap.data() as UserProfile)
           }
@@ -110,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               
               getToken(messaging, { vapidKey }).then(async (currentToken) => {
                 if (currentToken) {
-                  await updateDoc(userRef, {
+                  await updateDoc(uRef, {
                     fcmTokens: arrayUnion(currentToken)
                   }).catch(e => console.error("Failed to save FCM token:", e));
                 }
@@ -147,8 +155,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval)
   }, [user])
 
+  const authValue = useMemo(() => ({
+    user,
+    profile,
+    isLoading
+  }), [user, profile, isLoading])
+
   return (
-    <AuthContext.Provider value={{ user, profile, isLoading }}>
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   )
