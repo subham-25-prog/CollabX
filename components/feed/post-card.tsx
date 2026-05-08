@@ -4,13 +4,14 @@ import React, { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Link as LinkIcon, Flag, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Link as LinkIcon, Flag, Trash2, X, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { toggleLikePost, voteOnPoll, deletePost, togglePinPost } from "@/lib/db"
 import { toast } from "sonner"
 import { PostCommentsModal } from "./post-comments-modal"
 import { AnimatePresence } from "framer-motion"
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
+import { formatTimeAgo, cn } from "@/lib/utils"
 
 interface PostCardProps {
   post: {
@@ -58,7 +59,8 @@ export function PostCard({ post, onDelete }: PostCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   // Format timestamp safely
-  const timeAgo = post.timestamp?.toDate ? formatTimeAgo(post.timestamp.toDate()) : "Just now"
+  // Format timestamp safely using shared utility
+  const timeAgo = formatTimeAgo(post.timestamp)
 
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
 
@@ -143,8 +145,8 @@ export function PostCard({ post, onDelete }: PostCardProps) {
                 {post.author.name}
               </h3>
               {post.isPinned && (
-                <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm">
-                  📌 Pinned
+                <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20 shadow-sm shadow-primary/5">
+                  <Bookmark className="w-2.5 h-2.5 fill-current" /> Pinned
                 </span>
               )}
             </div>
@@ -238,13 +240,16 @@ export function PostCard({ post, onDelete }: PostCardProps) {
             {post.images.map((img, i) => (
               <div 
                 key={i} 
-                className="min-w-full snap-center overflow-hidden border-y sm:border border-border relative aspect-square bg-secondary cursor-pointer flex items-center justify-center"
+                className="min-w-full snap-center overflow-hidden border-y sm:border border-border relative aspect-square bg-secondary/30 cursor-pointer flex items-center justify-center group/img"
                 onClick={() => setSelectedImage(img)}
               >
-                <img
+                <Image
                   src={img}
                   alt={`Post image ${i+1}`}
-                  className="w-full h-full object-contain"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-contain transition-transform duration-500 group-hover/img:scale-[1.02]"
+                  unoptimized // Keep unoptimized if using external URLs that might not be in next.config
                 />
               </div>
             ))}
@@ -278,21 +283,25 @@ export function PostCard({ post, onDelete }: PostCardProps) {
       ) : post.image ? (
         <div className="px-0 sm:px-0">
           <motion.div
-            className="overflow-hidden border-y sm:border border-border relative bg-secondary cursor-pointer flex items-center justify-center"
+            className="overflow-hidden border-y sm:border border-border relative bg-secondary/30 cursor-pointer flex items-center justify-center min-h-[300px]"
             onClick={() => { if (!post.image?.match(/\.(mp4|webm|mov|ogg)/i)) setSelectedImage(post.image!) }}
           >
             {post.image.match(/\.(mp4|webm|mov|ogg)/i) ? (
               <video
                 src={post.image}
                 controls
-                className="w-full max-h-[587px] object-contain bg-black"
+                className="w-full max-h-[587px] object-contain bg-black/5"
               />
             ) : (
-              <img
-                src={post.image}
-                alt="Post media"
-                className="w-full max-h-[587px] object-contain"
-              />
+              <div className="relative w-full aspect-[4/5] max-h-[587px]">
+                <Image
+                  src={post.image}
+                  alt="Post media"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
             )}
           </motion.div>
         </div>
@@ -302,41 +311,62 @@ export function PostCard({ post, onDelete }: PostCardProps) {
       {post.poll && (
         <div className="px-4 pb-4 space-y-2">
           {post.poll.options.map((option) => {
-            const isWinner = false // could calculate if poll is closed
             const isVoted = userVote === option.id
             const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0
 
             return (
-              <div 
+              <motion.div 
                 key={option.id} 
+                whileTap={!userVote ? { scale: 0.99 } : {}}
                 onClick={() => handleVote(option.id)}
-                className={`relative overflow-hidden rounded-xl border ${userVote ? 'border-transparent' : 'border-border hover:bg-secondary/50 cursor-pointer'} transition-colors group`}
+                className={cn(
+                  "relative overflow-hidden rounded-xl border transition-all duration-300 group",
+                  userVote 
+                    ? "border-border bg-secondary/20" 
+                    : "border-border hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
+                )}
               >
-                {/* Progress bar background (only show if voted) */}
+                {/* Progress bar background */}
                 {userVote && (
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${percentage}%` }}
-                    className={`absolute inset-0 opacity-20 ${isVoted ? 'bg-primary' : 'bg-muted-foreground'}`}
+                    transition={{ type: "spring", stiffness: 50, damping: 20 }}
+                    className={cn(
+                      "absolute inset-y-0 left-0 opacity-15",
+                      isVoted ? 'bg-primary' : 'bg-muted-foreground'
+                    )}
                   />
                 )}
                 
-                <div className="relative px-4 py-3 flex items-center justify-between">
-                  <span className={`font-medium z-10 ${isVoted ? 'text-foreground font-bold' : 'text-foreground'}`}>
-                    {option.text}
-                  </span>
+                <div className="relative px-4 py-3 flex items-center justify-between z-10">
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "font-medium transition-colors",
+                      isVoted ? 'text-primary font-bold' : 'text-foreground'
+                    )}>
+                      {option.text}
+                    </span>
+                    {isVoted && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                  </div>
                   
                   {userVote && (
-                    <span className={`font-medium z-10 ${isVoted ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <span className={cn(
+                      "font-bold tabular-nums",
+                      isVoted ? 'text-primary' : 'text-muted-foreground'
+                    )}>
                       {percentage}%
                     </span>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )
           })}
-          <div className="text-sm text-muted-foreground mt-2">
-            {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2 px-1">
+            <Users className="w-3.5 h-3.5" />
+            <span>{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
+            <span>•</span>
+            <span>{userVote ? 'Voting closed' : 'Cast your vote'}</span>
           </div>
         </div>
       )}
@@ -449,17 +479,3 @@ export function PostCard({ post, onDelete }: PostCardProps) {
   )
 }
 
-function formatTimeAgo(date: Date) {
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
-  let interval = seconds / 31536000
-  if (interval > 1) return Math.floor(interval) + "y ago"
-  interval = seconds / 2592000
-  if (interval > 1) return Math.floor(interval) + "mo ago"
-  interval = seconds / 86400
-  if (interval > 1) return Math.floor(interval) + "d ago"
-  interval = seconds / 3600
-  if (interval > 1) return Math.floor(interval) + "h ago"
-  interval = seconds / 60
-  if (interval > 1) return Math.floor(interval) + "m ago"
-  return "Just now"
-}

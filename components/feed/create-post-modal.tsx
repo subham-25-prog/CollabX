@@ -200,16 +200,16 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
           e.stopPropagation()
           setActivePopover(null)
         }}
-        className="w-full max-w-lg glass rounded-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-lg glass-strong border border-white/10 rounded-3xl overflow-hidden flex flex-col max-h-[85vh] shadow-2xl"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-          <h2 className="text-lg font-semibold text-foreground">Create Post</h2>
+        <div className="flex items-center justify-between p-5 glass-strong border-b border-white/5 shrink-0">
+          <h2 className="text-xl font-bold text-foreground">Create Post</h2>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-secondary/50 transition-colors"
+            className="p-2 rounded-full hover:bg-secondary/50 transition-colors"
           >
             <X className="w-5 h-5 text-muted-foreground" />
           </motion.button>
@@ -314,9 +314,9 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
         </div>
 
         {/* Actions */}
-        <div className="p-4 border-t border-border shrink-0">
+        <div className="p-4 glass-strong border-t border-white/5 shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1">
               <input
                 type="file"
                 ref={fileInputRef}

@@ -14,6 +14,7 @@ import Image from "next/image"
 import { muteChat, reportUser, blockUser, deleteChat, setTypingStatus, createNotification } from "@/lib/db"
 import { useRouter } from "next/navigation"
 import { compressImageToBase64 } from "@/lib/image-utils"
+import { cn, getStringColor } from "@/lib/utils"
 
 interface ChatWindowProps {
   conversation: {
@@ -34,10 +35,6 @@ const formatTime = (date: Date) => {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-const getStringColor = (str: string) => {
-  const colors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400", "text-purple-400", "text-pink-400"]
-  return colors[str.length % colors.length]
-}
 
 const COMMON_EMOJIS = ["😀","😂","😍","🙏","👍","🔥","❤️","✨","😢","😎","🤔","🙌"]
 
@@ -406,55 +403,73 @@ export function ChatWindow({ conversation, chatId, onBack }: ChatWindowProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"}`}
+              className={cn(
+                "flex w-full mb-2",
+                message.sender === "me" ? "justify-end" : "justify-start"
+              )}
             >
               {message.sender !== "me" && conversation.user.isGroup && message.senderAvatar && (
-                <Link href={`/profile?id=${message.senderId}`} className="mr-2 flex flex-col items-center flex-shrink-0 mt-1 hover:opacity-80 transition-opacity">
-                  <Image width={32} height={32} unoptimized src={message.senderAvatar} alt={message.senderName} className="w-8 h-8 rounded-full object-cover" title={message.senderName} />
+                <Link href={`/profile?id=${message.senderId}`} className="mr-2 self-end mb-1 hover:opacity-80 transition-opacity">
+                  <Image width={28} height={28} unoptimized src={message.senderAvatar} alt={message.senderName} className="w-7 h-7 rounded-full object-cover" />
                 </Link>
               )}
               <div
-                className={`relative max-w-[85%] sm:max-w-[75%] shadow-sm text-[15px] break-words overflow-hidden ${
-                  (!message.content && message.imageUrl) ? "p-1 pb-5" : "px-4 py-3"
-                } ${
+                className={cn(
+                  "relative max-w-[85%] sm:max-w-[75%] shadow-sm text-[15px] break-words overflow-hidden",
+                  (!message.content && message.imageUrl) ? "p-1 pb-6" : "px-4 py-2.5",
                   message.sender === "me"
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20 rounded-2xl rounded-br-md ml-auto"
-                    : "glass rounded-2xl rounded-bl-md mr-auto"
-                } ${message.isSending ? 'opacity-70' : ''}`}
+                    ? "gradient-primary text-white shadow-md shadow-primary/20 rounded-2xl rounded-br-none ml-auto"
+                    : "glass rounded-2xl rounded-bl-none mr-auto",
+                  message.isSending && "opacity-70 animate-pulse"
+                )}
               >
-
                 {message.sender !== "me" && conversation.user.isGroup && message.senderName && (
-                  <p className={`text-xs font-bold ${(!message.content && message.imageUrl) ? 'px-2 pt-1 mb-1' : 'mb-1'} ${getStringColor(message.senderName)}`}>{message.senderName}</p>
+                  <p className={cn(
+                    "text-[11px] font-bold uppercase tracking-wider mb-1",
+                    (!message.content && message.imageUrl) && 'px-2 pt-1',
+                    getStringColor(message.senderName)
+                  )}>{message.senderName}</p>
                 )}
                 {message.imageUrl && (
                   message.mediaType === 'video' ? (
                     <video 
                       src={message.imageUrl} 
                       controls
-                      className={`w-full max-w-sm rounded-[12px] object-cover bg-black/10 ${message.content ? 'mb-2' : ''}`} 
+                      className={cn(
+                        "w-full max-w-sm rounded-xl object-cover bg-black/10",
+                        message.content && 'mb-2'
+                      )} 
                     />
                   ) : (
-                    <img 
-                      src={message.imageUrl} 
-                      alt="Attachment" 
-                      className={`w-full max-w-sm rounded-[12px] object-cover ${message.content ? 'mb-2' : ''}`} 
-                    />
+                    <div className={cn(
+                      "relative w-full max-w-sm rounded-xl overflow-hidden",
+                      message.content && 'mb-2'
+                    )}>
+                      <img 
+                        src={message.imageUrl} 
+                        alt="Attachment" 
+                        className="w-full object-cover transition-transform hover:scale-105 duration-500" 
+                      />
+                    </div>
                   )
                 )}
                 {message.content && (
-                  <p className="leading-relaxed whitespace-pre-wrap break-all pr-10 pb-1 text-sm">{message.content}</p>
+                  <p className="leading-relaxed whitespace-pre-wrap break-words pr-8 pb-1 text-[14px]">
+                    {message.content}
+                  </p>
                 )}
                 <div
-                  className={`absolute bottom-1 right-2 flex items-center gap-1 text-[10px] ${
-                    message.sender === "me" ? "text-primary-foreground/70" : "text-muted-foreground"
-                  }`}
+                  className={cn(
+                    "absolute bottom-1 right-2 flex items-center gap-1 text-[9px] font-medium",
+                    message.sender === "me" ? "text-white/70" : "text-muted-foreground"
+                  )}
                 >
                   <span>{message.timestampFormatted}</span>
                   {message.sender === "me" && (
-                    message.isSending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 
-                    message.read ? <CheckCheck className="w-3.5 h-3.5 text-blue-500" /> :
-                    conversation.user.online ? <CheckCheck className="w-3.5 h-3.5 text-muted-foreground" /> :
-                    <Check className="w-3.5 h-3.5 text-muted-foreground" />
+                    message.isSending ? <Loader2 className="w-3 h-3 animate-spin" /> : 
+                    message.read ? <CheckCheck className="w-3.5 h-3.5 text-blue-300" /> :
+                    conversation.user.online ? <CheckCheck className="w-3.5 h-3.5 opacity-70" /> :
+                    <Check className="w-3.5 h-3.5 opacity-70" />
                   )}
                 </div>
               </div>

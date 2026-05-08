@@ -9,6 +9,7 @@ import { Sidebar } from "@/components/layout/sidebar"
 import { ProfileHeader } from "@/components/profile/profile-header"
 import { ProfileTabs } from "@/components/profile/profile-tabs"
 import { PostCard } from "@/components/feed/post-card"
+import { ProfileSkeleton } from "@/components/profile/profile-skeleton"
 import { useAuth } from "@/components/auth/auth-provider"
 import { db } from "@/lib/firebase"
 import { doc, getDoc, collection, query, where, getDocs, orderBy, onSnapshot } from "firebase/firestore"
@@ -82,11 +83,7 @@ function ProfileContent() {
   }, [profileId, currentUser?.uid, authLoading])
 
   if (isLoading || authLoading) {
-    return (
-      <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    )
+    return <ProfileSkeleton />
   }
 
   if (!profile) {
@@ -267,7 +264,7 @@ export default function ProfilePage() {
       <div className="flex">
         <Sidebar />
         <div className="flex-1 lg:ml-64 w-full min-w-0">
-          <Suspense fallback={<div className="flex justify-center items-center h-screen"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+          <Suspense fallback={<ProfileSkeleton />}>
             <ProfileContent />
           </Suspense>
         </div>

@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/navbar"
 import { Sidebar } from "@/components/layout/sidebar"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { PostCard } from "@/components/feed/post-card"
+import { FeedSkeleton } from "@/components/feed/feed-skeleton"
 import dynamic from "next/dynamic"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -264,9 +265,7 @@ function FeedContent() {
 
             {/* Posts feed */}
             {isLoading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
+              <FeedSkeleton />
             ) : posts.length === 0 && pinnedPosts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">No posts yet. Be the first to share something!</p>

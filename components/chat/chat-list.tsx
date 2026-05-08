@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { Search, Edit } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface Conversation {
   id: string
@@ -66,16 +67,24 @@ export function ChatList({ conversations, selectedId, onSelect }: ChatListProps)
           return (
             <motion.button
               key={conversation.id}
-              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onSelect(conversation.id)}
-              className={`w-full flex items-center gap-3 p-4 border-b border-border/50 transition-all duration-200 text-left ${
+              className={cn(
+                "w-full flex items-center gap-3 p-4 border-b border-border/30 transition-all duration-300 text-left relative overflow-hidden group",
                 isSelected
-                  ? "bg-primary/10 border-l-2 border-l-primary"
+                  ? "bg-primary/10"
                   : conversation.unread > 0 
-                    ? "bg-green-500/5 hover:bg-green-500/10" 
-                    : "hover:bg-secondary/30"
-              }`}
+                    ? "bg-primary/5 hover:bg-primary/10" 
+                    : "hover:bg-secondary/40"
+              )}
             >
+              {isSelected && (
+                <motion.div
+                  layoutId="active-chat"
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_12px_rgba(var(--primary),0.8)]"
+                />
+              )}
+              
               <div className="relative flex-shrink-0">
                 <Image
                   src={conversation.user.avatar}
@@ -83,30 +92,36 @@ export function ChatList({ conversations, selectedId, onSelect }: ChatListProps)
                   width={48}
                   height={48}
                   unoptimized
-                  className="w-12 h-12 rounded-full object-cover"
+                  className="w-12 h-12 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary/20 transition-all"
                 />
                 {conversation.user.online && (
-                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background" />
+                  <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background shadow-[0_0_8px_rgba(34,197,94,0.4)]">
+                    <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75" />
+                  </span>
                 )}
               </div>
               
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className={`font-semibold truncate ${
+                <div className="flex items-center justify-between mb-0.5">
+                  <h3 className={cn(
+                    "font-bold truncate text-sm transition-colors",
                     isSelected ? "text-primary" : "text-foreground"
-                  }`}>
+                  )}>
                     {conversation.user.name}
                   </h3>
-                  <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase flex-shrink-0 ml-2">
                     {conversation.timestamp}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className={`text-sm truncate pr-2 ${conversation.unread > 0 ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
+                  <p className={cn(
+                    "text-xs truncate pr-2 transition-colors",
+                    conversation.unread > 0 ? "text-foreground font-bold" : "text-muted-foreground"
+                  )}>
                     {conversation.lastMessage}
                   </p>
                   {conversation.unread > 0 && (
-                    <span className="flex-shrink-0 min-w-[20px] h-[20px] rounded-full bg-green-500 text-white flex items-center justify-center text-[11px] font-bold px-1.5 shadow-sm">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold shadow-lg shadow-primary/20 animate-in zoom-in">
                       {conversation.unread}
                     </span>
                   )}

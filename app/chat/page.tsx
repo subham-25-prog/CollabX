@@ -1,19 +1,20 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Navbar } from "@/components/layout/navbar"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { Sidebar } from "@/components/layout/sidebar"
 import { ChatList } from "@/components/chat/chat-list"
 import { ChatWindow } from "@/components/chat/chat-window"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, MessageSquare } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { collection, query, where, onSnapshot, getDoc, doc, orderBy } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useNotifications } from "@/hooks/use-notifications"
 import { markNotificationRead } from "@/lib/db"
+import { formatTimeAgo } from "@/lib/utils"
 
 function ChatContent() {
   const { profile: currentUser, isLoading: authLoading } = useAuth()
@@ -21,7 +22,6 @@ function ChatContent() {
   const router = useRouter()
   const initialChatId = searchParams.get("id")
   
-  const [conversations, setConversations] = useState<any[]>([])
   const [selectedChat, setSelectedChat] = useState<string | null>(initialChatId)
   const [isMobileListVisible, setIsMobileListVisible] = useState(!initialChatId)
   const [isLoading, setIsLoading] = useState(true)
@@ -95,61 +95,60 @@ function ChatContent() {
   }, [chats, currentUser])
 
   // Derive conversations from chats and userProfiles
-  useEffect(() => {
-    const getConversations = async () => {
-      const data = await Promise.all(chats.map(async (chat) => {
-        let otherUser: any = { name: "Unknown User", avatar: "https://api.dicebear.com/7.x/initials/svg?seed=fallback", online: false, isGroup: false }
-        let otherUserId: string | undefined
+  // Memoize conversation data for stability and performance
+  const conversations = useMemo(() => {
+    const data = chats.map((chat) => {
+      let otherUser: any = { 
+        id: chat.id, 
+        name: "Unknown User", 
+        avatar: "https://api.dicebear.com/7.x/initials/svg?seed=fallback", 
+        online: false, 
+        isGroup: chat.type === 'project' 
+      }
+      let otherUserId: string | undefined
 
-        if (chat.type === 'project' && chat.projectId) {
-          const projectDoc = await getDoc(doc(db, "projects", chat.projectId))
-          if (projectDoc.exists()) {
-            const pData = projectDoc.data()
-            otherUser = {
-              id: chat.projectId,
-              name: pData.title,
-              avatar: pData.imageUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${chat.projectId}`,
-              online: true,
-              isGroup: true
-            }
-          }
-        } else {
-          otherUserId = chat.participants?.find((id: string) => id !== currentUser?.uid)
-          const userData = otherUserId ? userProfiles[otherUserId] : null
+      if (chat.type === 'project' && chat.projectId) {
+        // Project chats usually have the project title as name
+        otherUser = {
+          id: chat.projectId,
+          name: chat.projectName || "Project Team",
+          avatar: chat.projectAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${chat.projectId}`,
+          online: true,
+          isGroup: true
+        }
+      } else {
+        otherUserId = chat.participants?.find((id: string) => id !== currentUser?.uid)
+        const userData = otherUserId ? userProfiles[otherUserId] : null
+        
+        if (userData) {
+          const lastActive = userData.lastActive?.toDate ? userData.lastActive.toDate() : null
+          const isOnline = lastActive ? (Date.now() - lastActive.getTime()) < 60 * 1000 : false
           
-          if (userData) {
-            const lastActive = userData.lastActive?.toDate()
-            const isOnline = lastActive ? (Date.now() - lastActive.getTime()) < 60 * 1000 : false
-            
-            otherUser = {
-              id: otherUserId,
-              name: userData.name,
-              avatar: userData.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherUserId}`,
-              online: isOnline,
-              isGroup: false
-            }
+          otherUser = {
+            id: otherUserId,
+            name: userData.name,
+            avatar: userData.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${otherUserId}`,
+            online: isOnline,
+            isGroup: false
           }
         }
+      }
 
-        const unreadCount = notifications.filter(
-          n => !n.read && n.type === 'message' && (n.senderId === otherUserId || n.link?.includes(`id=${chat.id}`))
-        ).length
+      const unreadCount = notifications.filter(
+        n => !n.read && n.type === 'message' && (n.senderId === otherUserId || n.link?.includes(`id=${chat.id}`))
+      ).length
 
-        return {
-          id: chat.id,
-          user: otherUser,
-          lastMessage: chat.lastMessage || "No messages yet",
-          timestamp: chat.updatedAt?.toDate ? formatTimeAgo(chat.updatedAt.toDate()) : "Just now",
-          unread: unreadCount,
-          updatedAt: chat.updatedAt?.toDate() || new Date(0)
-        }
-      }))
+      return {
+        id: chat.id,
+        user: otherUser,
+        lastMessage: chat.lastMessage || "No messages yet",
+        timestamp: formatTimeAgo(chat.updatedAt),
+        unread: unreadCount,
+        updatedAt: chat.updatedAt?.toDate() || new Date(0)
+      }
+    })
 
-      data.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-      setConversations(data)
-    }
-
-    getConversations()
+    return data.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
   }, [chats, userProfiles, notifications, currentUser, now])
 
   // Mark notifications as read when chat is selected or on initial load
@@ -238,30 +237,27 @@ function ChatContent() {
                 onBack={handleBackToList}
               />
             ) : (
-              <div className="hidden lg:flex flex-1 items-center justify-center">
-                <div className="text-center">
-                  <div className="w-20 h-20 rounded-2xl gradient-primary mx-auto mb-4 flex items-center justify-center opacity-50">
-                    <svg
-                      className="w-10 h-10 text-primary-foreground"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
+              <div className="hidden lg:flex flex-1 items-center justify-center bg-secondary/5">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center max-w-sm px-6"
+                >
+                  <div className="w-24 h-24 rounded-3xl bg-linear-to-br from-primary/20 to-primary/5 mx-auto mb-6 flex items-center justify-center shadow-inner">
+                    <MessageSquare className="w-12 h-12 text-primary opacity-80" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">
-                    Select a conversation
+                  <h3 className="text-2xl font-bold text-foreground mb-2">
+                    Your Messages
                   </h3>
-                  <p className="text-muted-foreground">
-                    Choose from your existing conversations or start a new one
+                  <p className="text-muted-foreground leading-relaxed">
+                    Select a conversation from the list to start chatting with your team or colleagues.
                   </p>
-                </div>
+                  <div className="mt-8 flex flex-wrap justify-center gap-2">
+                    <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">Real-time</span>
+                    <span className="px-3 py-1 rounded-full bg-secondary text-muted-foreground text-xs font-semibold">Secure</span>
+                    <span className="px-3 py-1 rounded-full bg-secondary text-muted-foreground text-xs font-semibold">Collaborative</span>
+                  </div>
+                </motion.div>
               </div>
             )}
             </div>
@@ -284,17 +280,3 @@ export default function ChatPage() {
   )
 }
 
-function formatTimeAgo(date: Date) {
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
-  let interval = seconds / 31536000
-  if (interval > 1) return Math.floor(interval) + "y"
-  interval = seconds / 2592000
-  if (interval > 1) return Math.floor(interval) + "mo"
-  interval = seconds / 86400
-  if (interval > 1) return Math.floor(interval) + "d"
-  interval = seconds / 3600
-  if (interval > 1) return Math.floor(interval) + "h"
-  interval = seconds / 60
-  if (interval > 1) return Math.floor(interval) + "m"
-  return "now"
-}

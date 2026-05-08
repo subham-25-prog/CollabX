@@ -6,6 +6,7 @@ import { X, Loader2, Camera } from "lucide-react"
 import { updateUserProfile } from "@/lib/db"
 import { toast } from "sonner"
 import { compressImageToBase64 } from "@/lib/image-utils"
+import { cn } from "@/lib/utils"
 
 interface EditProfileModalProps {
   profile: any
@@ -146,20 +147,29 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.2 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg bg-background border border-border rounded-2xl overflow-hidden max-h-[90vh] flex flex-col shadow-2xl"
+        className="w-full max-w-lg glass-strong border border-white/10 rounded-3xl overflow-hidden max-h-[90vh] flex flex-col shadow-2xl"
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border z-10 shrink-0">
-          <button onClick={onClose} className="text-foreground hover:opacity-70 transition-opacity">
-            <X className="w-6 h-6" />
-          </button>
-          <h2 className="text-base font-bold text-foreground">Edit profile</h2>
-          <button 
+        <div className="flex items-center justify-between px-6 py-4 glass-strong border-b border-white/5 z-10 shrink-0">
+          <div className="flex items-center gap-4">
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onClose} 
+              className="p-2 rounded-full hover:bg-secondary/50 transition-colors"
+            >
+              <X className="w-5 h-5 text-muted-foreground" />
+            </motion.button>
+            <h2 className="text-xl font-bold text-foreground">Edit Profile</h2>
+          </div>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleSubmit}
             disabled={isLoading || isUploadingImage || !name.trim()}
-            className="text-primary font-bold text-base hover:opacity-80 transition-opacity disabled:opacity-50"
+            className="px-6 py-2 rounded-full gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Done"}
-          </button>
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Changes"}
+          </motion.button>
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-0">
@@ -216,82 +226,90 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Name"
-                className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
-              />
+          <form onSubmit={handleSubmit} className="px-6 pb-8 space-y-6">
+            <div className="space-y-2 group">
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Full Name</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your Name"
+                  className="w-full px-4 py-3 bg-secondary/30 glass border border-transparent focus:border-primary/50 rounded-xl transition-all outline-none text-foreground text-sm"
+                />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Role</label>
-              <input
-                type="text"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                placeholder="e.g. Software Engineer"
-                className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
-              />
+            <div className="space-y-2 group">
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Professional Role</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  placeholder="e.g. Full Stack Developer"
+                  className="w-full px-4 py-3 bg-secondary/30 glass border border-transparent focus:border-primary/50 rounded-xl transition-all outline-none text-foreground text-sm"
+                />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Location</label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="City, Country"
-                className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
-              />
+            <div className="space-y-2 group">
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Location</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="City, Country"
+                  className="w-full px-4 py-3 bg-secondary/30 glass border border-transparent focus:border-primary/50 rounded-xl transition-all outline-none text-foreground text-sm"
+                />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bio</label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                rows={3}
-                placeholder="Tell us about yourself..."
-                className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base resize-none"
-              />
+            <div className="space-y-2 group">
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Bio</label>
+              <div className="relative">
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={3}
+                  placeholder="Tell your story..."
+                  className="w-full px-4 py-3 bg-secondary/30 glass border border-transparent focus:border-primary/50 rounded-xl transition-all outline-none text-foreground text-sm resize-none"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">College Name</label>
+              <div className="space-y-2 group">
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">College Name</label>
                 <input
                   type="text"
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
                   placeholder="e.g. Stanford University"
-                  className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
+                  className="w-full px-4 py-3 bg-secondary/30 glass border border-transparent focus:border-primary/50 rounded-xl transition-all outline-none text-foreground text-sm"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Department / Stream</label>
+              <div className="space-y-2 group">
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Department</label>
                 <input
                   type="text"
                   value={dept}
                   onChange={(e) => setDept(e.target.value)}
                   placeholder="e.g. Computer Science"
-                  className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
+                  className="w-full px-4 py-3 bg-secondary/30 glass border border-transparent focus:border-primary/50 rounded-xl transition-all outline-none text-foreground text-sm"
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Year of Study</label>
+            <div className="space-y-2 group">
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Year of Study</label>
               <select
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
-                className="w-full py-2 bg-transparent border-b border-border focus:border-primary transition-colors outline-none text-foreground text-base"
+                className="w-full px-4 py-3 bg-secondary/30 glass border border-transparent focus:border-primary/50 rounded-xl transition-all outline-none text-foreground text-sm appearance-none"
               >
                 <option value="" disabled className="bg-background">Select Year</option>
                 <option value="1st Year" className="bg-background">1st Year</option>
@@ -304,23 +322,25 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Skills</label>
-              <div className="w-full min-h-[42px] p-1.5 bg-transparent border-b border-border focus-within:border-primary transition-colors flex flex-wrap gap-2 items-center">
+            <div className="space-y-3 group">
+              <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest ml-1 group-focus-within:text-primary transition-colors">Technical Skills</label>
+              <div className="w-full min-h-[50px] p-2 bg-secondary/30 glass border border-transparent focus-within:border-primary/50 rounded-xl transition-all flex flex-wrap gap-2 items-center">
                 {skills.map((skill) => (
-                  <span 
+                  <motion.span 
                     key={skill} 
-                    className="flex items-center gap-1 px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm font-medium"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 gradient-primary text-primary-foreground rounded-lg text-xs font-bold shadow-md shadow-primary/20"
                   >
                     {skill}
                     <button 
                       type="button" 
                       onClick={() => removeSkill(skill)}
-                      className="text-muted-foreground hover:text-foreground transition-colors ml-1"
+                      className="hover:bg-white/20 rounded-full p-0.5 transition-colors"
                     >
                       <X className="w-3 h-3" />
                     </button>
-                  </span>
+                  </motion.span>
                 ))}
                 <input
                   type="text"
@@ -338,11 +358,11 @@ export function EditProfileModal({ profile, onClose }: EditProfileModalProps) {
                     }
                   }}
                   onKeyDown={handleAddSkill}
-                  placeholder={skills.length === 0 ? "Type a skill and press Enter..." : ""}
-                  className="flex-1 min-w-[120px] bg-transparent outline-none text-foreground text-sm py-1 px-2"
+                  placeholder={skills.length === 0 ? "Type skill and press Enter..." : "Add more..."}
+                  className="flex-1 min-w-[120px] bg-transparent outline-none text-foreground text-sm py-1 px-2 placeholder:text-muted-foreground"
                 />
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Press Enter or comma to add a skill.</p>
+              <p className="text-[10px] text-muted-foreground ml-1">Tip: Press Enter or use commas to separate multiple skills.</p>
             </div>
           </form>
         </div>
