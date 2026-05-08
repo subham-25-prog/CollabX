@@ -151,9 +151,9 @@ export default function TeamsPage() {
       <div className="flex">
         <Sidebar />
         <main 
-          className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 w-full min-w-0"
+          className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 w-full min-w-0 overflow-hidden"
         >
-          <div className="max-w-6xl mx-auto px-4 py-3 sm:py-6">
+          <div className="w-full max-w-6xl mx-auto px-4 py-3 sm:py-6 min-w-0">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

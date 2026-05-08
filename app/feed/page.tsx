@@ -229,10 +229,10 @@ function FeedContent() {
       <div className="flex">
         <Sidebar />
         
-        <main className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 flex justify-center">
-          <div className="w-full max-w-[1000px] flex gap-8 px-0 sm:px-6 py-2 sm:py-6">
+        <main className="flex-1 lg:ml-64 pt-16 pb-20 lg:pb-8 flex justify-center w-full min-w-0 overflow-hidden">
+          <div className="w-full max-w-[1000px] flex gap-8 px-0 sm:px-6 py-2 sm:py-6 min-w-0">
             {/* Feed Main Column */}
-            <div className="flex-1 max-w-[620px] mx-auto xl:mx-0">
+            <div className="w-full max-w-[620px] mx-auto xl:mx-0 min-w-0">
             {/* Create post trigger - Desktop */}
             <motion.div
               whileHover={{ y: -2 }}
