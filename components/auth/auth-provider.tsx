@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, useMemo, useRef } from "react"
 import { auth, db } from "@/lib/firebase"
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth"
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, arrayUnion } from "firebase/firestore"
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, arrayUnion, query, where, collection, getDocs, limit } from "firebase/firestore"
 import { messaging } from "@/lib/firebase"
 import { getToken } from "firebase/messaging"
 import { useRouter } from "next/navigation"
@@ -83,22 +83,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (!data.email && firebaseUser.email) {
               data.email = firebaseUser.email
             }
+            console.log("AuthProvider: Profile found by UID", firebaseUser.uid);
             setProfile(data)
           } else {
-            const newProfile: UserProfile = {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "New User",
-              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "New User")}`,
-              role: "Student",
-              bio: "Hey there! I am using CollabX.",
-              skills: [],
-              availability: "Available",
-              location: "Earth",
-              onboardingCompleted: false,
+            console.log("AuthProvider: Profile NOT found by UID, checking by email", firebaseUser.email);
+            // Check for existing profile by email as fallback
+            const email = firebaseUser.email
+            let existingProfileFound = false
+            
+            if (email) {
+              const q = query(collection(db, "users"), where("email", "==", email), limit(1))
+              const querySnapshot = await getDocs(q)
+              if (!querySnapshot.empty) {
+                const existingData = querySnapshot.docs[0].data() as UserProfile
+                console.log("AuthProvider: Found existing profile by email, migrating to new UID");
+                const profileToUse = { 
+                  ...existingData, 
+                  uid: firebaseUser.uid,
+                  // Ensure email is set if it was missing
+                  email: existingData.email || email 
+                }
+                await setDoc(uRef, profileToUse)
+                setProfile(profileToUse)
+                existingProfileFound = true
+              }
             }
-            await setDoc(uRef, newProfile)
-            setProfile(newProfile)
+
+            if (!existingProfileFound) {
+              console.log("AuthProvider: No profile found by email either, creating new profile");
+              const newProfile: UserProfile = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email || "",
+                name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "New User",
+                avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "New User")}`,
+                role: "Student",
+                bio: "Hey there! I am using CollabX.",
+                skills: [],
+                availability: "Available",
+                location: "Earth",
+                onboardingCompleted: false,
+              }
+              await setDoc(uRef, newProfile)
+              setProfile(newProfile)
+            }
           }
         } catch (error) {
           console.error("CRITICAL: Error fetching/creating user profile in Firestore:", error)
