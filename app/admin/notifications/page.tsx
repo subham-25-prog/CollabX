@@ -9,6 +9,7 @@ import { useAuth } from "@/components/auth/auth-provider"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { auth } from "@/lib/firebase"
+import { checkIsAdmin } from "@/lib/admin"
 
 export default function AdminNotificationsPage() {
   const { profile, isLoading: isAuthLoading } = useAuth()
@@ -20,7 +21,7 @@ export default function AdminNotificationsPage() {
 
   useEffect(() => {
     if (!isAuthLoading) {
-      if (!profile || profile.role !== 'Admin') {
+      if (!profile || !checkIsAdmin(profile)) {
         router.replace("/feed")
       }
     }
@@ -78,7 +79,7 @@ export default function AdminNotificationsPage() {
     }
   }
 
-  if (isAuthLoading || !profile || profile.role !== 'Admin') {
+  if (isAuthLoading || !profile || !checkIsAdmin(profile)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

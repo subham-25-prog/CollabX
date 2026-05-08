@@ -190,7 +190,7 @@ export default function AdminFeedbackPage() {
                           <p className="font-bold truncate text-foreground">{f.userName}</p>
                           <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            {f.timestamp ? formatDistanceToNow(f.timestamp.toDate(), { addSuffix: true }) : "just now"}
+                            {f.timestamp ? formatDistanceToNow(f.timestamp.toDate ? f.timestamp.toDate() : new Date(f.timestamp), { addSuffix: true }) : "just now"}
                           </p>
                         </div>
                       </div>

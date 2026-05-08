@@ -125,9 +125,13 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
-  body {
+  html, body {
     @apply bg-background text-foreground;
+    width: 100%;
+    overflow-x: hidden;
+    position: relative;
   }
 }
 
@@ -188,6 +192,14 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top);
   }
 }
 

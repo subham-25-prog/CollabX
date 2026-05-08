@@ -8,6 +8,7 @@ import { PostCard } from "@/components/feed/post-card"
 import { FeedSkeleton } from "@/components/feed/feed-skeleton"
 import dynamic from "next/dynamic"
 import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
 
 const CreatePostModal = dynamic(() => import("@/components/feed/create-post-modal").then(mod => mod.CreatePostModal), { ssr: false })
 const PostCommentsModal = dynamic(() => import("@/components/feed/post-comments-modal").then(mod => mod.PostCommentsModal), { ssr: false })
@@ -46,8 +47,13 @@ function FeedContent() {
   const selectedPost = postParam ? posts.find(p => p.id === postParam) : null
 
   useEffect(() => {
-    if (!isAuthLoading && profile && profile.onboardingCompleted === false) {
-      router.replace("/onboarding")
+    if (!isAuthLoading) {
+      if (!profile) {
+        console.log("Feed: No profile found, redirecting to /auth");
+        router.replace("/auth")
+      } else if (profile.onboardingCompleted === false) {
+        router.replace("/onboarding")
+      }
     }
   }, [profile, isAuthLoading, router])
 
@@ -168,8 +174,11 @@ function FeedContent() {
   useEffect(() => {
     if (profile && !pageLoadTime) {
       fetchPosts();
+    } else if (!isAuthLoading && !profile) {
+      // If we're not loading auth and there's no profile, stop page loading
+      setIsLoading(false);
     }
-  }, [profile, pageLoadTime, calculateRelevanceScore]);
+  }, [profile, pageLoadTime, isAuthLoading]);
 
   // Listen for NEW posts globally and integrate them automatically
   useEffect(() => {
@@ -322,9 +331,9 @@ function FeedContent() {
 
               <div className="px-4 text-[11px] text-muted-foreground space-y-2">
                 <div className="flex flex-wrap gap-2">
-                  <a href="#" className="hover:underline">Privacy Policy</a>
-                  <a href="#" className="hover:underline">Terms of Service</a>
-                  <a href="#" className="hover:underline">Cookie Policy</a>
+                  <Link href="/privacy" className="hover:underline text-muted-foreground">Privacy Policy</Link>
+                  <Link href="/terms" className="hover:underline text-muted-foreground">Terms of Service</Link>
+                  <a href="#" className="hover:underline text-muted-foreground">Cookie Policy</a>
                 </div>
                 <p>© 2026 CollabX. All rights reserved.</p>
               </div>

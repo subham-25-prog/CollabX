@@ -8,7 +8,8 @@ export function checkIsAdmin(profile: any): boolean {
   if (!profile) return false;
   
   const email = profile.email || '';
+  const role = profile.role || '';
   
-  // Only the Master Admin email is allowed
-  return email === MASTER_ADMIN_EMAIL;
+  // Allow either the Master Admin email OR the 'Admin' role from Firestore
+  return email === MASTER_ADMIN_EMAIL || role === 'Admin';
 }

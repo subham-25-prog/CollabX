@@ -81,7 +81,7 @@ export function ChatList({ conversations, selectedId, onSelect }: ChatListProps)
               {isSelected && (
                 <motion.div
                   layoutId="active-chat"
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_12px_rgba(var(--primary),0.8)]"
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_12px_var(--primary)]"
                 />
               )}
               

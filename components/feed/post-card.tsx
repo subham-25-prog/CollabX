@@ -12,6 +12,7 @@ import { PostCommentsModal } from "./post-comments-modal"
 import { AnimatePresence } from "framer-motion"
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
 import { formatTimeAgo, cn } from "@/lib/utils"
+import { checkIsAdmin } from "@/lib/admin"
 
 interface PostCardProps {
   post: {
@@ -171,7 +172,7 @@ export function PostCard({ post, onDelete }: PostCardProps) {
                 >
                   <LinkIcon className="w-4 h-4" /> Copy Link
                 </DropdownMenu.Item>
-                {profile?.role === 'Admin' && (
+                {checkIsAdmin(profile) && (
                   <DropdownMenu.Item 
                     className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-default hover:bg-secondary/80 focus:bg-secondary/80 text-foreground"
                     onClick={async () => {
@@ -187,13 +188,13 @@ export function PostCard({ post, onDelete }: PostCardProps) {
                   </DropdownMenu.Item>
                 )}
                 <DropdownMenu.Separator className="h-px bg-border my-1" />
-                {profile?.uid === post.author.id || profile?.role === 'Admin' ? (
+                {profile?.uid === post.author.id || checkIsAdmin(profile) ? (
                   <DropdownMenu.Item 
                     className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg outline-none cursor-default hover:bg-destructive/10 focus:bg-destructive/10 text-destructive"
                     onClick={async () => {
                       if (confirm("Are you sure you want to delete this post?")) {
                         try {
-                          const isAdmin = profile?.role === 'Admin' && profile?.uid !== post.author.id;
+                          const isAdmin = checkIsAdmin(profile) && profile?.uid !== post.author.id;
                           await deletePost(post.id, isAdmin, profile?.uid)
                           if (onDelete) onDelete(post.id);
                           toast.success("Post deleted successfully")

@@ -15,6 +15,7 @@ import { db } from "@/lib/firebase"
 import { LogoIcon } from "@/components/ui/logo"
 import { InstallPWAButton } from "@/components/pwa/install-button"
 import { FeedbackModal } from "@/components/feedback/feedback-modal"
+import { checkIsAdmin } from "@/lib/admin"
 
 interface NavbarProps {
   onCreatePost?: () => void
@@ -234,7 +235,7 @@ export function Navbar({ onCreatePost }: NavbarProps) {
 
 
             {/* Admin Icon for Mobile */}
-            {profile?.role === 'Admin' && (
+            {checkIsAdmin(profile) && (
               <Link href="/admin/notifications" className="md:hidden p-2.5 rounded-xl hover:bg-secondary/50 transition-colors">
                 <ShieldCheck className="w-5 h-5 text-primary" />
               </Link>

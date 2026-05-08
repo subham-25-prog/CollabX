@@ -79,7 +79,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const docSnap = await getDoc(uRef)
           
           if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile)
+            const data = docSnap.data() as UserProfile
+            if (!data.email && firebaseUser.email) {
+              data.email = firebaseUser.email
+            }
+            setProfile(data)
           } else {
             const newProfile: UserProfile = {
               uid: firebaseUser.uid,
@@ -97,7 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setProfile(newProfile)
           }
         } catch (error) {
-          console.error("Error creating or fetching user profile:", error)
+          console.error("CRITICAL: Error fetching/creating user profile in Firestore:", error)
+          // Ensure we don't hang in a loading state if Firestore fails
+          setProfile(null)
         } finally {
           setIsLoading(false)
         }
@@ -105,7 +111,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Setup real-time listener for profile updates
         unsubscribeProfile = onSnapshot(uRef, (docSnap) => {
           if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile)
+            const data = docSnap.data() as UserProfile
+            // Ensure email is present from firebaseUser if missing in Firestore
+            if (!data.email && firebaseUser.email) {
+              data.email = firebaseUser.email
+            }
+            setProfile(data)
           }
         })
 

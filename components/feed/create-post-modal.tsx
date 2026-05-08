@@ -25,7 +25,7 @@ const FUNNY_SNIPPETS = [
 ]
 
 export function CreatePostModal({ onClose }: CreatePostModalProps) {
-  const { profile } = useAuth()
+  const { profile, user } = useAuth()
   const [content, setContent] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [selectedImages, setSelectedImages] = useState<string[]>([])
@@ -45,7 +45,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
     const validPollOptions = pollOptions.map(opt => opt.trim()).filter(opt => opt.length > 0)
     
     if (!content.trim() && selectedImages.length === 0 && validPollOptions.length === 0) return
-    if (!profile) return
+    if (!user) return
 
     if (showPoll && validPollOptions.length < 2) {
       toast.error("A poll must have at least 2 options")
@@ -89,10 +89,10 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
 
       await createPost(
         {
-          id: profile.uid,
-          name: profile.name,
-          avatar: profile.avatar,
-          role: profile.role
+          id: user.uid,
+          name: profile?.name || user.displayName || user.email?.split('@')[0] || "Student",
+          avatar: profile?.avatar || user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${user.uid}`,
+          role: profile?.role || "Student"
         }, 
         content, 
         uploadedUrls.length > 0 ? uploadedUrls[0] : undefined,
@@ -224,8 +224,10 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
               alt="Your profile"
               className="w-11 h-11 rounded-full object-cover ring-2 ring-primary/20 bg-secondary"
             />
-            <div>
-              <p className="font-medium text-foreground">{profile?.name || "Loading..."}</p>
+            <div className="flex-1">
+              <p className="font-bold text-foreground">
+                {profile?.name || user?.displayName || user?.email?.split('@')[0] || "Student"}
+              </p>
               <button className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium bg-secondary/50 px-2 py-0.5 rounded-full mt-0.5">
                 <Users className="w-3.5 h-3.5" />
                 Everyone
@@ -397,7 +399,7 @@ export function CreatePostModal({ onClose }: CreatePostModalProps) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleSubmit}
-              disabled={(!content.trim() && selectedImages.length === 0 && !pollOptions.some(o => o.trim())) || isLoading || !profile}
+              disabled={(!content.trim() && selectedImages.length === 0 && !pollOptions.some(o => o.trim())) || isLoading || !user}
               className="px-6 py-2 rounded-full gradient-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoading ? (

@@ -29,16 +29,30 @@ function ProfileContent() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!authLoading && currentUser && currentUser.onboardingCompleted === false) {
-      router.replace("/onboarding")
+    if (!authLoading) {
+      if (!currentUser) {
+        console.log("Profile: No user found, redirecting to /auth");
+        router.replace("/auth")
+      } else if (currentUser.onboardingCompleted === false) {
+        router.replace("/onboarding")
+      }
     }
   }, [currentUser, authLoading, router])
 
   useEffect(() => {
-    if (authLoading || !profileId && !currentUser) return
+    if (authLoading || (!profileId && !currentUser)) {
+      if (!authLoading) {
+        console.log("Profile: Stopping loader because no target user and auth is ready");
+        setIsLoading(false);
+      }
+      return
+    }
 
     let targetUserId = profileId || currentUser?.uid
-    if (!targetUserId) return
+    if (!targetUserId) {
+      setIsLoading(false)
+      return
+    }
 
     setIsLoading(true)
     setProfile(null)

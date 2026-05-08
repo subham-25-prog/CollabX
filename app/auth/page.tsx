@@ -68,7 +68,7 @@ export default function AuthPage() {
                 background: useMotionTemplate`
                   radial-gradient(
                     650px circle at ${mouseX}px ${mouseY}px,
-                    rgba(var(--primary), 0.1),
+                    oklch(from var(--primary) l c h / 0.1),
                     transparent 80%
                   )
                 `,

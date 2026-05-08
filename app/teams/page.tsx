@@ -66,8 +66,13 @@ export default function TeamsPage() {
   }, [activeTab])
 
   useEffect(() => {
-    if (!isAuthLoading && profile && profile.onboardingCompleted === false) {
-      router.replace("/onboarding")
+    if (!isAuthLoading) {
+      if (!profile) {
+        console.log("Teams: No profile found, redirecting to /auth");
+        router.replace("/auth")
+      } else if (profile.onboardingCompleted === false) {
+        router.replace("/onboarding")
+      }
     }
   }, [profile, isAuthLoading, router])
 
@@ -82,6 +87,11 @@ export default function TeamsPage() {
         setIsLoading(false)
       }
     }
+    if (!isAuthLoading && !profile) {
+      console.log("Teams: Auth loaded but no profile, stopping loader");
+      setIsLoading(false)
+      return
+    }
     fetchData()
 
     // Listen to projects
@@ -95,7 +105,7 @@ export default function TeamsPage() {
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [profile, isAuthLoading])
 
   const filteredUsers = users.filter((user) => {
     const userSkills = user.skills || []
@@ -166,56 +176,73 @@ export default function TeamsPage() {
             <div className="flex flex-nowrap overflow-x-auto custom-scrollbar p-1 rounded-xl bg-secondary/50 backdrop-blur-md gap-1 max-w-full w-full sm:w-auto relative">
               <button
                 onClick={() => handleTabChange("projects")}
-                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative z-10 ${
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative ${
                   activeTab === "projects" 
                     ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
+                {activeTab === "projects" && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-background rounded-lg shadow-sm -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
                 <FolderKanban className="w-4 h-4" /> Projects
               </button>
               <button
                 onClick={() => handleTabChange("my_projects")}
-                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative z-10 ${
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative ${
                   activeTab === "my_projects" 
                     ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
+                {activeTab === "my_projects" && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-background rounded-lg shadow-sm -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
                 <FolderKanban className="w-4 h-4" /> My Projects
               </button>
               <button
                 onClick={() => handleTabChange("startups")}
-                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative z-10 ${
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative ${
                   activeTab === "startups" 
                     ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
+                {activeTab === "startups" && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-background rounded-lg shadow-sm -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
                 <Lightbulb className="w-4 h-4" /> Startup Ideas
               </button>
               <button
                 onClick={() => handleTabChange("students")}
-                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative z-10 ${
+                className={`flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap relative ${
                   activeTab === "students" 
                     ? "text-foreground" 
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
+                {activeTab === "students" && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-background rounded-lg shadow-sm -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
                 <UsersIcon className="w-4 h-4" /> Students
               </button>
-              
-              {/* Sliding Background for Tabs */}
-              <motion.div
-                layoutId="activeTabBg"
-                className="absolute h-[calc(100%-8px)] rounded-lg bg-background shadow-sm z-0 top-1 bottom-1"
-                initial={false}
-                animate={{
-                  left: activeTab === "projects" ? 4 : activeTab === "my_projects" ? 110 : activeTab === "startups" ? 230 : 360,
-                  width: activeTab === "projects" ? 100 : activeTab === "my_projects" ? 120 : activeTab === "startups" ? 130 : 110
-                }}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
+
             </div>
 
             {(activeTab === "projects" || activeTab === "my_projects" || activeTab === "startups") && (
@@ -288,7 +315,7 @@ export default function TeamsPage() {
           </AnimatePresence>
 
           {/* Main Swipeable Area */}
-          <div className="relative min-h-[80vh]">
+          <div className="relative min-h-[80vh] overflow-hidden">
             <AnimatePresence initial={false} custom={direction}>
               {isLoading ? (
                 <motion.div 

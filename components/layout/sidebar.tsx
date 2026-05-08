@@ -14,6 +14,7 @@ import { useState } from "react"
 import { auth } from "@/lib/firebase"
 import { signOut } from "firebase/auth"
 import { useRouter } from "next/navigation"
+import { checkIsAdmin } from "@/lib/admin"
 
 const navItems: { icon: any; label: string; href: string; badge?: number }[] = [
   { icon: Home, label: "Home Feed", href: "/feed" },
@@ -57,7 +58,7 @@ export function Sidebar() {
         {/* Profile card */}
         <Link href="/profile">
           <motion.div
-            whileHover={{ scale: 1.02, backgroundColor: "rgba(var(--secondary), 0.4)" }}
+            whileHover={{ scale: 1.02, backgroundColor: "var(--secondary)" }}
             whileTap={{ scale: 0.98 }}
             className="flex items-center gap-3 p-3 rounded-2xl bg-secondary/20 border border-border/50 transition-all duration-300 mb-6 group"
           >
@@ -85,13 +86,13 @@ export function Sidebar() {
             { icon: Users, label: "Find Team", href: "/teams" },
             { icon: MessageCircle, label: "Messages", href: "/chat", badge: notifications.filter(n => !n.read && n.type === 'message').length > 0 ? true : undefined },
             { icon: User, label: "Profile", href: "/profile" },
-            ...(profile?.role === 'Admin' ? [{ icon: ShieldCheck, label: "Admin", href: "/admin/notifications" }] : [])
+            ...(checkIsAdmin(profile) ? [{ icon: ShieldCheck, label: "Admin", href: "/admin/notifications" }] : [])
           ].map((item) => {
             const isActive = pathname === item.href
             return (
               <Link key={item.href} href={item.href} className="block relative group">
                 <motion.div
-                  whileHover={{ x: 4, backgroundColor: "rgba(var(--secondary), 0.5)" }}
+                  whileHover={{ x: 4, backgroundColor: "var(--secondary)" }}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
                     "relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300",
@@ -113,7 +114,7 @@ export function Sidebar() {
                   )} />
                   <span className="font-medium relative z-10">{item.label}</span>
                   {item.badge && (
-                    <span className="ml-auto w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)] relative z-10 animate-pulse" />
+                    <span className="ml-auto w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_var(--primary)] relative z-10 animate-pulse" />
                   )}
                 </motion.div>
               </Link>
